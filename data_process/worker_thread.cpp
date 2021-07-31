@@ -12,7 +12,7 @@
 #include <QDateTime>
 
 SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
-    json_file(QDir::currentPath() + "/" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".json")
+    json_file(QDir::currentPath() + "/MEW-" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".json")
 {
     jsfile_opened = json_file.open(QIODevice::Append);
     if(jsfile_opened) {
@@ -34,25 +34,22 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
         return;
     }
 
-    QJsonObject jobj;
+    QJsonObject jsobj;
     QString str;
+    int ret = RET_FAIL;
 
     if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_BASIC_FT_RSP_FC == (uchar)hexdata[1] ) {
-        parse_chgbox_basic_ft_rsp(hexdata, jobj, str);
-        emit resultReady(str);
-        if(jsfile_opened) {
-            QJsonDocument jdoc;
-            jdoc.setObject(jobj);
-            json_file.write(jdoc.toJson());
-            json_file.flush();
-        }
+        ret = parse_chgbox_basic_ft_rsp(hexdata, jsobj, str);
     }
     else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_W_SN_RSP_FC == (uchar)hexdata[1] ) {
-        parse_chgbox_ft_w_sn_rsp(hexdata, jobj, str);
+        ret = parse_chgbox_ft_w_sn_rsp(hexdata, jsobj, str);
+    }
+
+    if(RET_OK == ret) {
         emit resultReady(str);
         if(jsfile_opened) {
             QJsonDocument jdoc;
-            jdoc.setObject(jobj);
+            jdoc.setObject(jsobj);
             json_file.write(jdoc.toJson());
             json_file.flush();
         }

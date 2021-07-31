@@ -23,9 +23,9 @@
 #define CHGBOX_FT_SN_LEN  10
 
 QByteArray construct_chgbox_basic_ft_cmd(bool led1, bool led2, bool led3, bool chg_mode);
-int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jobj, QString &str);
+int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str);
 
 int construct_chgbox_ft_w_sn_cmd(QByteArray SN, QByteArray &hexcmd);
-int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jobj, QString &str);
+int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str);
 
 #endif // end of MEW_CHGBOX_H

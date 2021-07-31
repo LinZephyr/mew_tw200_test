@@ -1,4 +1,6 @@
 #include "utils.h"
+#include "mew_type_define.h"
+
 #include <QStringList>
 
 int string2HexArray(const QString &str, QByteArray &hexArr)
@@ -14,11 +16,11 @@ int string2HexArray(const QString &str, QByteArray &hexArr)
             continue;
         data = (char)list.at(i).toInt(&ok, 16);
         if(!ok){
-            return -1;
+            return RET_FAIL;
         }
         hexArr.append(data);
     }
-    return 0;
+    return RET_OK;
 }
 
 QString hexArray2String(const QByteArray &hexArr)
