@@ -35,25 +35,30 @@ QString hexArray2String(const QByteArray &hexArr)
 }
 
 #define CRC_KEY 7
-unsigned char CRC8(unsigned char crc, unsigned char * ptr, unsigned char len)
+unsigned char calcCRC8(unsigned char crc8, const unsigned char * ptr, unsigned char len)
 {
     unsigned char i;
     while(len--!=0)
     {
         for(i=0x80; i!=0; i/=2)
         {
-            if((crc & 0x80) != 0)
+            if((crc8 & 0x80) != 0)
             {
-                crc *= 2;
-                crc ^= CRC_KEY;
+                crc8 *= 2;
+                crc8 ^= CRC_KEY;
             }
             else
-                crc *= 2;
+                crc8 *= 2;
 
             if((*ptr & i)!=0)
-                crc ^= CRC_KEY;
+                crc8 ^= CRC_KEY;
         }
         ptr++;
     }
-    return(crc);
+    return(crc8);
+}
+
+bool checkCRC8(const unsigned char crc8, const unsigned char * ptr, unsigned char len)
+{
+    return crc8 == calcCRC8(0, ptr, len);
 }

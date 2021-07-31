@@ -224,7 +224,7 @@ typedef struct {
 int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd)
 {
     if(CHGBOX_FT_SN_LEN > SN.count()) {
-        qWarning() << "充电仓厂测SN长度不够！";
+        qWarning() << "充电仓厂测SN命令长度不够！";
         return RET_FAIL;
     }
     hexcmd.clear();
@@ -232,19 +232,27 @@ int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd)
     hexcmd.append(CHGBOX_FT_CMD_LEAD);
     hexcmd.append(CHGBOX_FT_W_SN_CMD_FC);
     hexcmd.append(SN);
-    hexcmd.append(CRC8(0, (uint8_t *)hexcmd.data(), CHGBOX_FT_W_SN_CMD_LEN - 1));
+    hexcmd.append(calcCRC8(0, (uint8_t *)hexcmd.data(), CHGBOX_FT_W_SN_CMD_LEN - 1));
 
     return RET_OK;
 }
 
 int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonObject &jsobj, QString &str, bool rw_flag)
 {
+
     chgbox_ft_w_sn_rsp_t rsp;
     QJsonArray jarr;
+    int len = CHGBOX_SN_FLAG_W == rw_flag ? CHGBOX_FT_W_SN_RSP_LEN : CHGBOX_FT_R_SN_RSP_LEN;
     QString title = CHGBOX_SN_FLAG_W == rw_flag ? "充电盒厂测写SN : \n{" : "充电盒厂测读SN : \n{";
+    uint8_t crc_recv = (uint8_t)(hexdata.data()[len - 1]);
+    uint8_t crc_calc = calcCRC8(0, (const uint8_t *)hexdata.data(),  len - 1);
 
-    memcpy((void *)&rsp, (void*)hexdata.data(), CHGBOX_FT_W_SN_RSP_LEN);
+    if(crc_recv != crc_calc) {
+        qWarning("SN CRC8校验码错误！收到CRC8:0x%X, 计算CRC8:0x%X", crc_recv, crc_calc);
+        return RET_FAIL;
+    }
     str.clear();
+    memcpy((void *)&rsp, (void*)hexdata.data(), len);
 
     str.append(title);
 
@@ -324,6 +332,7 @@ int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QStri
         qWarning() << "充电仓厂测写SN回复数据长度不够！";
         return RET_FAIL;
     }
+
     return chgbox_ft_get_sn(hexdata, jsobj, str, CHGBOX_SN_FLAG_W);
 }
 

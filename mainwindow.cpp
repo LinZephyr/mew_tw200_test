@@ -174,28 +174,11 @@ void MainWindow::setRelatedWidgetsStatus(bool opened)
 {
     setComWidgetsStatus(opened);
 
-    if(opened) {
-        ui->sendmsgBtn->setEnabled(true);
-        //ui->sendMsgLineEdit->setEnabled(true);
-        //ui->sendMsgLineEdit->setFocus();
-        //ui->hexSendRadioBtn->setEnabled(true);
-
-        //ui->hexRecvRadioBtn->setEnabled(true);
-        //ui->clearUpBtn->setEnabled(true);
-        ui->chgbox_basic_FT_btn->setEnabled(true);
-        ui->chgbox_wSN_btn->setEnabled(true);
-    }
-    else {
-        ui->sendmsgBtn->setEnabled(false);
-        //ui->sendMsgLineEdit->setEnabled(false);
-        //ui->sendMsgLineEdit->clearFocus();
-        //ui->hexSendRadioBtn->setEnabled(false);
-        //ui->hexRecvRadioBtn->setEnabled(false);
-        //ui->clearUpBtn->setEnabled(false);
-        ui->chgbox_basic_FT_btn->setEnabled(false);
-        ui->chgbox_wSN_btn->setEnabled(false);
-    }
-
+    bool enable_status = opened;
+    ui->sendmsgBtn->setEnabled(enable_status);
+    ui->chgbox_basic_FT_btn->setEnabled(enable_status);
+    ui->chgbox_wSN_btn->setEnabled(enable_status);
+    ui->chbox_r_sn_btn->setEnabled(enable_status);
 }
 
 void MainWindow::on_openCloseBtn_clicked()
@@ -243,6 +226,11 @@ int MainWindow::sendAsciiMsg(QString msg)
 
 int MainWindow::sendHexMsg(QByteArray hexdata)
 {
+    if(NULL == myCom) {
+        QMessageBox::information(this, tr("提示消息"), tr("串口未打开"), QMessageBox::Ok);
+        return -1;
+    }
+
     if(-1 == myCom->write(hexdata) ) {
         QMessageBox::critical(this, tr("警告"), tr("发送数据失败！ "), QMessageBox::Ok);
         return -1;
