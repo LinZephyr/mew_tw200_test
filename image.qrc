@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/maven_icon.ico</file>
+        <file>images/send.png</file>
+        <file>images/pause.png</file>
+        <file>images/cleanport.png</file>
+    </qresource>
+</RCC>
