@@ -223,7 +223,7 @@ void MainWindow::on_sendmsgBtn_clicked()
 
     if(ui->hexSendRadioBtn->isChecked()){
         QByteArray hexdata;
-        if(0 != string2HexArray(strdata, hexdata)) {
+        if(RET_OK != string2HexArray(strdata, hexdata)) {
             QMessageBox::information(this, tr("提示消息"), tr("输入的数据格式有错误！"), QMessageBox::Ok);
             return;
         }
@@ -312,7 +312,7 @@ void MainWindow::on_chgbox_wSN_btn_clicked()
     }
 
     QByteArray hexSN;
-    if(0 != string2HexArray(strSN, hexSN)) {
+    if(RET_OK != string2HexArray(strSN, hexSN)) {
         QMessageBox::information(this, tr("提示消息"), tr("输入的数据格式有错误！"), QMessageBox::Ok);
         return;
     }
@@ -323,7 +323,7 @@ void MainWindow::on_chgbox_wSN_btn_clicked()
     }
 
     QByteArray hexcmd;
-    if (0 == construct_chgbox_ft_w_sn_cmd(hexSN, hexcmd) ) {
+    if (RET_OK == construct_chgbox_ft_w_sn_cmd(hexSN, hexcmd) ) {
         sendHexMsg(hexcmd);
     }
 

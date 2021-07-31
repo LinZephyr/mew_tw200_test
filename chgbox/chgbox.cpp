@@ -81,7 +81,7 @@ QByteArray construct_chgbox_basic_ft_cmd(bool led1_on, bool led2_on, bool led3_o
 
 }
 
-int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jobj, QString &str)
+int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str)
 {
     //Q_UNUSED(hexdata);
 #ifdef CHG_BOX_DEBUG
@@ -90,7 +90,7 @@ int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jobj, QStri
 #endif
     if(CHGBOX_BASIC_FT_RSP_LEN > hexdata.count()) {
         qWarning() << "充电仓基本厂测回复数据长度不够！";
-        return -1;
+        return RET_FAIL;
     }
 
     chgbox_basic_ft_rsp_t rsp;
@@ -192,9 +192,9 @@ int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonObject &jobj, QStri
 
     str.append("}\n");
 
-    jobj.insert("充电盒厂测", jarr);
+    jsobj.insert("充电盒厂测", jarr);
 
-    return 0;
+    return RET_OK;
 }
 
 #define BAT_BRAND_DEFAULT   0xFF
@@ -225,7 +225,7 @@ int construct_chgbox_ft_w_sn_cmd(QByteArray SN, QByteArray &hexcmd)
 {
     if(CHGBOX_FT_SN_LEN > SN.count()) {
         qWarning() << "充电仓厂测SN长度不够！";
-        return -1;
+        return RET_FAIL;
     }
 
     hexcmd.append(CHGBOX_FT_CMD_LEAD);
@@ -233,14 +233,14 @@ int construct_chgbox_ft_w_sn_cmd(QByteArray SN, QByteArray &hexcmd)
     hexcmd.append(SN);
     hexcmd.append(CRC8(0, (uint8_t *)hexcmd.data(), CHGBOX_FT_W_SN_CMD_LEN - 1));
 
-    return 0;
+    return RET_OK;
 }
 
-int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jobj, QString &str)
+int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str)
 {
     if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
         qWarning() << "充电仓厂测写SN回复数据长度不够！";
-        return -1;
+        return RET_FAIL;
     }
 
     chgbox_ft_w_sn_rsp_t rsp;
@@ -315,9 +315,9 @@ int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jobj, QStrin
 
     str.append("}\n");
 
-    jobj.insert("充电盒厂测写SN", jarr);
+    jsobj.insert("充电盒厂测写SN", jarr);
 
-    return 0;
+    return RET_OK;
 }
 
 
