@@ -45,6 +45,8 @@ private slots:
     void on_chgbox_basic_FT_btn_clicked();
     void on_chgbox_wSN_btn_clicked();
 
+    void on_chbox_r_sn_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 

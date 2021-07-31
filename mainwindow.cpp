@@ -329,3 +329,12 @@ void MainWindow::on_chgbox_wSN_btn_clicked()
 
 }
 
+
+void MainWindow::on_chbox_r_sn_btn_clicked()
+{
+    QByteArray hexcmd;
+    if (RET_OK == construct_chgbox_ft_r_sn_cmd(hexcmd) ) {
+        sendHexMsg(hexcmd);
+    }
+}
+

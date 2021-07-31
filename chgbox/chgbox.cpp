@@ -221,12 +221,13 @@ typedef struct {
     uint8_t crc;
 } chgbox_ft_w_sn_rsp_t;
 
-int construct_chgbox_ft_w_sn_cmd(QByteArray SN, QByteArray &hexcmd)
+int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd)
 {
     if(CHGBOX_FT_SN_LEN > SN.count()) {
         qWarning() << "充电仓厂测SN长度不够！";
         return RET_FAIL;
     }
+    hexcmd.clear();
 
     hexcmd.append(CHGBOX_FT_CMD_LEAD);
     hexcmd.append(CHGBOX_FT_W_SN_CMD_FC);
@@ -236,19 +237,16 @@ int construct_chgbox_ft_w_sn_cmd(QByteArray SN, QByteArray &hexcmd)
     return RET_OK;
 }
 
-int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str)
+int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonObject &jsobj, QString &str, bool rw_flag)
 {
-    if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
-        qWarning() << "充电仓厂测写SN回复数据长度不够！";
-        return RET_FAIL;
-    }
-
     chgbox_ft_w_sn_rsp_t rsp;
     QJsonArray jarr;
+    QString title = CHGBOX_SN_FLAG_W == rw_flag ? "充电盒厂测写SN : \n{" : "充电盒厂测读SN : \n{";
 
     memcpy((void *)&rsp, (void*)hexdata.data(), CHGBOX_FT_W_SN_RSP_LEN);
     str.clear();
-    str.append("充电盒厂测写SN : \n{");
+
+    str.append(title);
 
     {
         QString key = "电池品牌";
@@ -315,9 +313,36 @@ int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QStri
 
     str.append("}\n");
 
-    jsobj.insert("充电盒厂测写SN", jarr);
+    jsobj.insert(title, jarr);
 
     return RET_OK;
 }
+
+int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str)
+{
+    if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
+        qWarning() << "充电仓厂测写SN回复数据长度不够！";
+        return RET_FAIL;
+    }
+    return chgbox_ft_get_sn(hexdata, jsobj, str, CHGBOX_SN_FLAG_W);
+}
+
+int construct_chgbox_ft_r_sn_cmd(QByteArray &hexcmd)
+{
+    hexcmd.clear();
+    hexcmd.append(CHGBOX_FT_CMD_LEAD);
+    hexcmd.append(CHGBOX_FT_R_SN_CMD_FC);
+    return RET_OK;
+}
+
+int parse_chgbox_ft_r_sn_rsp(const QByteArray hexdata, QJsonObject &jsobj, QString &str)
+{
+    if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
+        qWarning() << "充电仓厂测读SN回复数据长度不够！";
+        return RET_FAIL;
+    }
+    return chgbox_ft_get_sn(hexdata, jsobj, str, CHGBOX_SN_FLAG_R);
+}
+
 
 

@@ -44,6 +44,9 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
     else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_W_SN_RSP_FC == (uchar)hexdata[1] ) {
         ret = parse_chgbox_ft_w_sn_rsp(hexdata, jsobj, str);
     }
+    else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_R_SN_RSP_FC == (uchar)hexdata[1] ) {
+        ret = parse_chgbox_ft_r_sn_rsp(hexdata, jsobj, str);
+    }
 
     if(RET_OK == ret) {
         emit resultReady(str);
