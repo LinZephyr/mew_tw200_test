@@ -89,7 +89,7 @@ void QextSerialPortPrivate::setBaudRate(BaudRateType baudRate, bool update)
     case BAUD56000:
     case BAUD128000:
     case BAUD256000:
-        QESP_PORTABILITY_WARNING()<<"QextSerialPort Portability Warning: POSIX does not support baudRate:"<<baudRate;
+//        QESP_PORTABILITY_WARNING()<<"QextSerialPort Portability Warning: POSIX does not support baudRate:"<<baudRate;
 #elif defined(Q_OS_UNIX)
     //Unix Special
     case BAUD50:
