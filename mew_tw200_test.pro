@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     chgbox/chgbox.cpp \
     data_process/worker_thread.cpp \
+    earbud/earbud.cpp \
     main.cpp \
     mainwindow.cpp \
     qextserial/qextserialport.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 HEADERS += \
     chgbox/chgbox.h \
     data_process/worker_thread.h \
+    earbud/earbud.h \
     mainwindow.h \
     mew_type_define.h \
     qextserial/qextserialport.h \
