@@ -11,6 +11,8 @@
 #include <QDir>
 #include <QDateTime>
 
+static parse_func_map_t parse_map;
+
 SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
     json_file(QDir::currentPath() + "/MEW-" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".json")
 {
@@ -21,6 +23,8 @@ SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
     else {
         qDebug() << "open json file FAIL!!!";
     }
+
+    chgbox_initialize_parse_func_list(parse_map);
 }
 
 SerialPortWorker::~SerialPortWorker() {
@@ -35,16 +39,10 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
     }
 
     QJsonArray jsarr;
-    //int ret = RET_FAIL;
-
-    if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_BASIC_FT_RSP_FC == (uchar)hexdata[1] ) {
-        parse_chgbox_basic_ft_rsp(hexdata, jsarr);
-    }
-    else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_W_SN_RSP_FC == (uchar)hexdata[1] ) {
-        parse_chgbox_ft_w_sn_rsp(hexdata, jsarr);
-    }
-    else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_R_SN_RSP_FC == (uchar)hexdata[1] ) {
-        parse_chgbox_ft_r_sn_rsp(hexdata, jsarr);
+    const QString key =MAKE_STRING_UINT8_UINT8((uchar)hexdata[0], (uchar)hexdata[1]);
+    parse_func_map_t::iterator it = parse_map.find(key);
+    if(it != parse_map.end()) {
+        it.value()(hexdata, jsarr);
     }
 
     if(jsarr.isEmpty()) {

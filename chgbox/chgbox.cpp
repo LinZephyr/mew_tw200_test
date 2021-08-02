@@ -3,8 +3,30 @@
 
 #include <QtDebug>
 #include <QJsonArray>
+#include <QMap>
 
 #define CHG_BOX_DEBUG
+
+static parse_func_list_t chgbox_parse_func_list = {
+    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_BASIC_FT_RSP_FC),  parse_chgbox_basic_ft_rsp},
+    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_W_SN_RSP_FC),  parse_chgbox_ft_w_sn_rsp},
+    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_R_SN_RSP_FC),  parse_chgbox_ft_r_sn_rsp},
+};
+
+int chgbox_initialize_parse_func_list(parse_func_map_t &map)
+{
+    for(parse_func_list_t::const_iterator it = chgbox_parse_func_list.begin(); it != chgbox_parse_func_list.end(); ++it) {
+        if(map.find(it->first) != map.end()) {
+            QString str;
+            str.sprintf("[%s] duplicate map key: %s", __FUNCTION__, it->first.toStdString().data());
+            qWarning() << str;
+            //return -1;
+        }
+        map.insert(it->first, it->second);
+    }
+
+    return 0;
+}
 
 typedef struct {
     uint8_t LEAD;

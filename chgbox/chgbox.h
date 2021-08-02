@@ -25,6 +25,7 @@
 #define CHGBOX_FT_R_SN_RSP_FC  0x3F
 #define CHGBOX_FT_R_SN_RSP_LEN 13
 
+int chgbox_initialize_parse_func_list(parse_func_map_t &map);
 
 QByteArray construct_chgbox_basic_ft_cmd(bool led1, bool led2, bool led3, bool chg_mode);
 int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr);

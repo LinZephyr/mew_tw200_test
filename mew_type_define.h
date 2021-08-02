@@ -1,6 +1,8 @@
 #ifndef MEW_TYPE_DEFINE_H
 #define MEW_TYPE_DEFINE_H
-//#include <QString>
+#include <QString>
+#include <QByteArray>
+#include <QJsonArray>
 
 #define RET_OK 0
 #define RET_FAIL -1
@@ -9,6 +11,12 @@ typedef unsigned char  uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int   uint32_t;
 
+typedef QString func_uuid_t;
+typedef int (*parse_rsp_data_func_t)(const QByteArray hexdata, QJsonArray &jsarr);
+typedef QMap<func_uuid_t, parse_rsp_data_func_t> parse_func_map_t;
+typedef std::pair<func_uuid_t, parse_rsp_data_func_t> parse_func_pair_t;
+typedef std::initializer_list<parse_func_pair_t> parse_func_list_t;
 
+#define MAKE_STRING_UINT8_UINT8(U8_1, U8_2) QString::number((U8_1 << 8)|U8_2, 16)
 
 #endif // MEW_TYPE_DEFINE_H
