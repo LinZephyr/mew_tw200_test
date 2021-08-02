@@ -50,14 +50,45 @@ void MainWindow::startThread()
     connect(&comWorkerThread, SIGNAL(finished()), worker, SLOT(deleteLater()) );
 
     connect(this, SIGNAL(dataReceived(QByteArray)), worker, SLOT(doWork(QByteArray)) );
-    connect(worker, SIGNAL(resultReady(QString)), this, SLOT(handleResults(QString)) );
+    connect(worker, SIGNAL(resultReady(QJsonArray)), this, SLOT(handleResults(QJsonArray)) );
 
     comWorkerThread.start();
 }
 
-void MainWindow::handleResults(QString str)
+void MainWindow::handleResults(QJsonArray jsarr)
 {
-    ui->parsedDataBrowser->append(str);
+    //ui->parsedDataBrowser->append(str);
+    /*
+        Data format must be:
+        [
+            QString,
+            QJsonObject,
+            ...
+        ]
+    */
+    ui->parsedDataBrowser->append("\n");
+    for(QJsonArray::const_iterator it = jsarr.constBegin(); it != jsarr.constEnd(); ++it) {
+        if(it->type() == QJsonValue::String) {
+            QString str = it->toString();
+            ui->parsedDataBrowser->append(str);
+        }
+        else if(it->type() == QJsonValue::Object) {
+            QJsonObject jsobj = it->toObject();
+            for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
+                QString k = obj_it.key();
+                QVariant v = obj_it.value();
+                if(k.contains(ERR_KEY_STR)) {
+                    QColor cl = ui->parsedDataBrowser->textColor();
+                    ui->parsedDataBrowser->setTextColor(Qt::red);
+                    ui->parsedDataBrowser->append("\t" + k + " : " + v.toString());
+                    ui->parsedDataBrowser->setTextColor(cl);
+                }
+                else {
+                    ui->parsedDataBrowser->append("\t" + k + " : " + v.toString());
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::checkComPort()
@@ -252,22 +283,24 @@ void MainWindow::recv_com_data()
     QByteArray hexdata = myCom->readAll();
     QString asciidata;
 
-    if(!hexdata.isEmpty()){
-            //ui->textBrowser->setTextColor(Qt::black);
-            if(ui->hexRecvRadioBtn->isChecked()){
-                asciidata = hexArray2String(hexdata);
-            }
-            else {
-                asciidata = hexdata;
-            }
-
-        QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-        QString timeStrLine="[" + ts + "]";
-        QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
-        QString content = "<span style=\" color:blue;\">" + timeStrLine + tmpstr + asciidata + "\n\r" + "</span>";
-        ui->rawDataBrowser->append(content);
-        emit dataReceived(hexdata);
+    if(hexdata.isEmpty()) {
+        return;
     }
+
+    //ui->textBrowser->setTextColor(Qt::black);
+    if(ui->hexRecvRadioBtn->isChecked()){
+        asciidata = hexArray2String(hexdata);
+    }
+    else {
+        asciidata = hexdata;
+    }
+
+    QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString timeStrLine="[" + ts + "]";
+    QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
+    QString content = "<span style=\" color:blue;\">" + timeStrLine + tmpstr + asciidata + "\n\r" + "</span>";
+    ui->rawDataBrowser->append(content);
+    emit dataReceived(hexdata);
 }
 
 void MainWindow::on_comCheckBtn_clicked()

@@ -34,31 +34,27 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
         return;
     }
 
-    QJsonObject jsobj;
-    QString str;
-    int ret = RET_FAIL;
+    QJsonArray jsarr;
+    //int ret = RET_FAIL;
 
     if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_BASIC_FT_RSP_FC == (uchar)hexdata[1] ) {
-        ret = parse_chgbox_basic_ft_rsp(hexdata, jsobj, str);
+        parse_chgbox_basic_ft_rsp(hexdata, jsarr);
     }
     else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_W_SN_RSP_FC == (uchar)hexdata[1] ) {
-        ret = parse_chgbox_ft_w_sn_rsp(hexdata, jsobj, str);
+        parse_chgbox_ft_w_sn_rsp(hexdata, jsarr);
     }
     else if( CHGBOX_FT_RSP_LEAD == (uchar)hexdata[0] && CHGBOX_FT_R_SN_RSP_FC == (uchar)hexdata[1] ) {
-        ret = parse_chgbox_ft_r_sn_rsp(hexdata, jsobj, str);
+        parse_chgbox_ft_r_sn_rsp(hexdata, jsarr);
     }
 
-    if(RET_OK == ret) {
-        emit resultReady(str);
-        if(jsfile_opened) {
-            QJsonDocument jdoc;
-            jdoc.setObject(jsobj);
-            json_file.write(jdoc.toJson());
-            json_file.flush();
-        }
+    if(jsarr.isEmpty()) {
+        return;
     }
-
-
-
-
+    emit resultReady(jsarr);
+    if(jsfile_opened) {
+        QJsonDocument jdoc;
+        jdoc.setArray(jsarr);
+        json_file.write(jdoc.toJson());
+        json_file.flush();
+    }
 }

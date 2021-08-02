@@ -2,6 +2,8 @@
 #include "mew_type_define.h"
 
 #include <QStringList>
+#include <QJsonObject>
+#include <QDebug>
 
 int string2HexArray(const QString &str, QByteArray &hexArr)
 {
@@ -62,3 +64,23 @@ bool checkCRC8(const unsigned char crc8, const unsigned char * ptr, unsigned cha
 {
     return crc8 == calcCRC8(0, ptr, len);
 }
+
+void addInfo2Array(QJsonArray &jsarr, const QString k, const QString v, bool print)
+{
+    QJsonObject tmpobj;
+    tmpobj.insert(k, v);
+    jsarr.append(tmpobj);
+
+    if(print) {
+        qWarning() << tmpobj;
+    }
+}
+
+
+
+
+
+
+
+
+

@@ -5,6 +5,7 @@
 #include <QString>
 #include <QJsonObject>
 #include <QFile>
+#include <QJsonArray>
 
 class SerialPortWorker : public QObject
 {
@@ -17,7 +18,7 @@ public slots:
     void doWork(const QByteArray hexdata);
 
 signals:
-    void resultReady(QString str);
+    void resultReady(QJsonArray);
 private:
     QFile json_file;
     bool jsfile_opened;

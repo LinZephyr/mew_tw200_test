@@ -52,7 +52,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>200</y>
+         <y>240</y>
          <width>331</width>
          <height>131</height>
         </rect>
@@ -173,12 +173,12 @@
          <string>LED2</string>
         </property>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>119</x>
           <y>51</y>
-          <width>88</width>
+          <width>151</width>
           <height>20</height>
          </rect>
         </property>
@@ -202,12 +202,12 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>119</x>
           <y>81</y>
-          <width>88</width>
+          <width>151</width>
           <height>20</height>
          </rect>
         </property>
@@ -244,7 +244,7 @@
          <string>充电模式</string>
         </property>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>136</x>
@@ -289,12 +289,12 @@
          <string>LED3</string>
         </property>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>119</x>
           <y>111</y>
-          <width>88</width>
+          <width>151</width>
           <height>20</height>
          </rect>
         </property>

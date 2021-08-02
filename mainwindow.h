@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QJsonObject>
+#include <QJsonArray>
 
 #include "qextserial/qextserialport.h"
 
@@ -38,7 +39,7 @@ private slots:
     void on_sendmsgBtn_clicked();
 
     void recv_com_data();
-    void handleResults(QString str);
+    void handleResults(QJsonArray jsarr);
 
     void on_comCheckBtn_clicked();
     void on_clearUpBtn_clicked();
