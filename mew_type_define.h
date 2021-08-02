@@ -29,6 +29,6 @@ typedef std::initializer_list<parse_func_pair_t> parse_func_list_t;
             qWarning() << tmpobj;\
         }\
     }\
-while(0);
+while(0)
 
 #endif // MEW_TYPE_DEFINE_H

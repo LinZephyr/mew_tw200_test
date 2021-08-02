@@ -76,15 +76,15 @@ void MainWindow::handleResults(QJsonArray jsarr)
             QJsonObject jsobj = it->toObject();
             for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
                 QString k = obj_it.key();
-                QVariant v = obj_it.value();
+                QJsonValue v = obj_it.value();
                 if(k.contains(ERR_KEY_STR)) {
                     QColor cl = ui->parsedDataBrowser->textColor();
                     ui->parsedDataBrowser->setTextColor(Qt::red);
-                    ui->parsedDataBrowser->append("\t" + k + " : " + v.toString());
+                    ui->parsedDataBrowser->append("\t" + k + " : " + jsonValue2String(v) );
                     ui->parsedDataBrowser->setTextColor(cl);
                 }
                 else {
-                    ui->parsedDataBrowser->append("\t" + k + " : " + v.toString());
+                    ui->parsedDataBrowser->append("\t" + k + " : " + jsonValue2String(v) );
                 }
             }
         }

@@ -7,7 +7,7 @@
 
 int string2HexArray(const QString &str, QByteArray &hexArr);
 QString hexArray2String(const QByteArray &hexArr);
-QString qvariant2string(const QVariant jsval);
+QString jsonValue2String(const QJsonValue &jval);
 
 unsigned char calcCRC8(unsigned char crc8, const unsigned char * ptr, unsigned char len);
 bool checkCRC8(const unsigned char crc8, const unsigned char * ptr, unsigned char len);

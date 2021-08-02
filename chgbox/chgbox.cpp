@@ -112,7 +112,8 @@ int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr)
 #endif
 
     QString k;
-    QString v;
+    QString v_str;
+    uint16_t v_uint;
     chgbox_basic_ft_rsp_t rsp;
     QString topic = "充电仓基本厂测";
 
@@ -126,44 +127,44 @@ int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr)
     memcpy((void *)&rsp, (void*)hexdata.data(), CHGBOX_BASIC_FT_RSP_LEN);
 
     k = "LED1";
-    v = 1 == rsp.D0.bits.led1 ? "ON" : "OFF";
-    addInfo2Array(jsarr, k, v, false);
+    v_str = 1 == rsp.D0.bits.led1 ? "ON" : "OFF";
+    addInfo2Array(jsarr, k, v_str, false);
 
     k = "LED2";
-    v = 1 == rsp.D0.bits.led2 ? "ON" : "OFF";
-    addInfo2Array(jsarr, k, v, false);
+    v_str = 1 == rsp.D0.bits.led2 ? "ON" : "OFF";
+    addInfo2Array(jsarr, k, v_str, false);
 
     k = "LED3";
-    v = 1 == rsp.D0.bits.led3 ? "ON" : "OFF";
-    addInfo2Array(jsarr, k, v, false);
+    v_str = 1 == rsp.D0.bits.led3 ? "ON" : "OFF";
+    addInfo2Array(jsarr, k, v_str, false);
 
     k = "HALL";
-    v = 1 == rsp.D0.bits.hall ? "ON" : "OFF";
-    addInfo2Array(jsarr, k, v, false);
+    v_str = 1 == rsp.D0.bits.hall ? "ON" : "OFF";
+    addInfo2Array(jsarr, k, v_str, false);
 
     k = "NTC(mV)";
-    v = QString::number((uint16_t)rsp.NTC_part2 | ((uint16_t)rsp.NTC_part1 << 8));
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = (uint16_t)rsp.NTC_part2 | ((uint16_t)rsp.NTC_part1 << 8);
+    addInfo2Array(jsarr, k, v_uint, false);
 
     k = "电池电压(mV)";
-    v = QString::number((uint16_t)rsp.bat_vol_part2 | ((uint16_t)rsp.bat_vol_part1 << 8));
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = (uint16_t)rsp.bat_vol_part2 | ((uint16_t)rsp.bat_vol_part1 << 8);
+    addInfo2Array(jsarr, k, v_uint, false);
 
     k = "电池充电电流(mA)";
-    v = QString::number(rsp.box_chg_cur * 10);
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = rsp.box_chg_cur * 10;
+    addInfo2Array(jsarr, k, v_uint, false);
 
     k = "左耳电流(mA)";
-    v = QString::number(rsp.l_earbud_cur);
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = rsp.l_earbud_cur;
+    addInfo2Array(jsarr, k, v_uint, false);
 
     k = "右耳电流(mA)";
-    v = QString::number(rsp.r_earbud_cur);
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = rsp.r_earbud_cur;
+    addInfo2Array(jsarr, k, v_uint, false);
 
     k =  "程序版本号";
-    v = QString::number(rsp.fw_ver);
-    addInfo2Array(jsarr, k, v, false);
+    v_uint = rsp.fw_ver;
+    addInfo2Array(jsarr, k, v_uint, false);
 
     return RET_OK;
 }

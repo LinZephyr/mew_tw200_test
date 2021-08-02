@@ -36,6 +36,20 @@ QString hexArray2String(const QByteArray &hexArr)
     return str;
 }
 
+QString jsonValue2String(const QJsonValue &jval)
+{
+    //qDebug() << "v.type = " << jval.type();
+    QString str;
+    if(jval.type() == QJsonValue::Double ) {
+        str = QString::number(jval.toDouble());
+    }
+    else if(jval.type() == QJsonValue::String) {
+        str = jval.toString();
+    }
+
+    return str;
+}
+
 #define CRC_KEY 7
 unsigned char calcCRC8(unsigned char crc8, const unsigned char * ptr, unsigned char len)
 {
