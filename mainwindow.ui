@@ -42,7 +42,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="chgboxTab">
       <attribute name="title">
@@ -374,7 +374,7 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>371</width>
+        <width>381</width>
         <height>81</height>
        </rect>
       </property>
@@ -473,39 +473,17 @@
         <bool>false</bool>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color:green;
-padding-left: 10px;
-border-style: solid;
-border-width: 2px;
-
-</string>
+        <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 170, 0);
+border-color: rgb(0, 255, 0);
+border-width: 1px;
+border-style: solid;</string>
        </property>
        <property name="text">
         <string>发送</string>
        </property>
-      </widget>
-      <widget class="QLabel" name="send_lbl_2">
-       <property name="geometry">
-        <rect>
-         <x>120</x>
-         <y>80</y>
-         <width>54</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color:green;
-padding-left: 10px;
-border-style: solid;
-border-width: 2px;
-
-</string>
-       </property>
-       <property name="text">
-        <string>发送</string>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
       <widget class="QLabel" name="send_lbl_3">
@@ -521,15 +499,17 @@ border-width: 2px;
         <bool>false</bool>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color:blue;
-padding-left: 10px;
-border-style: solid;
-border-width: 2px;
-
-</string>
+        <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 85, 255);
+border-color: rgb(0, 85, 255);
+border-style:solid;
+border-width:1px;</string>
        </property>
        <property name="text">
         <string>接收</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </widget>
