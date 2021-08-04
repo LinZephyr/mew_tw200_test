@@ -7,6 +7,30 @@
 
 #define CHG_BOX_DEBUG
 
+#define CHGBOX_FT_CMD_LEAD          0XAA
+#define CHGBOX_FT_RSP_LEAD         0XAA
+
+#define CHGBOX_BASIC_FT_CMD_FC           0XF1
+#define CHGBOX_BASIC_FT_CMD_LEN          3
+#define CHGBOX_BASIC_FT_RSP_FC           0X1F
+#define CHGBOX_BASIC_FT_RSP_LEN          11
+
+#define CHGBOX_FT_W_SN_CMD_FC          0XF2
+#define CHGBOX_FT_W_SN_CMD_LEN         13
+#define CHGBOX_FT_W_SN_RSP_FC          0X2F
+#define CHGBOX_FT_W_SN_RSP_LEN         13
+
+
+#define CHGBOX_FT_R_SN_CMD_FC  0xF3
+#define CHGBOX_FT_R_SN_CMD_LEN 2
+#define CHGBOX_FT_R_SN_RSP_FC  0x3F
+#define CHGBOX_FT_R_SN_RSP_LEN 13
+
+#define CHGBOX_SN_FLAG_W  0
+#define CHGBOX_SN_FLAG_R  1
+
+//int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonArray &jsarr, bool rw_flag);
+
 static parse_func_list_t chgbox_parse_func_list = {
     {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_BASIC_FT_RSP_FC),  parse_chgbox_basic_ft_rsp},
     {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_W_SN_RSP_FC),  parse_chgbox_ft_w_sn_rsp},
