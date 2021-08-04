@@ -104,7 +104,7 @@ QString earbud_get_rsp_key(const QByteArray &hexrsp)
     QString key;
     if((uint32_t)hexrsp.count() >= sizeof(earbud_vbus_rsp_header_t)) {
         earbud_vbus_rsp_header_t *rsp = (earbud_vbus_rsp_header_t *)hexrsp.data();
-        key.sprintf("%02X%02X%02X", rsp->race_id1, rsp->race_id2, rsp->race_cmd);
+        key.sprintf("%02X%02X%02X", (uint8_t)rsp->race_id1, (uint8_t)rsp->race_id2, (uint8_t)rsp->race_cmd);
     }
 
     return key;

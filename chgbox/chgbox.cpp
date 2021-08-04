@@ -70,7 +70,7 @@ QString chgbox_get_rsp_key(const QByteArray &hexrsp)
 {
     QString key;
     if(hexrsp.count() >= 2) {
-        key.sprintf("%02X%02X", hexrsp[0], hexrsp[1]);
+        key.sprintf("%02x%02x", (uint8_t)hexrsp[0], (uint8_t)hexrsp[1]);
     }
     return key;
 }
