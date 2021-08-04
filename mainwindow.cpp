@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "utils/utils.h"
 #include "chgbox/chgbox.h"
+#include "earbud/earbud.h"
 #include "data_process/worker_thread.h"
 
 #include <QDebug>
@@ -207,9 +208,10 @@ void MainWindow::setRelatedWidgetsStatus(bool opened)
 
     bool enable_status = opened;
     ui->sendmsgBtn->setEnabled(enable_status);
-    ui->chgbox_basic_FT_btn->setEnabled(enable_status);
-    ui->chgbox_wSN_btn->setEnabled(enable_status);
-    ui->chbox_r_sn_btn->setEnabled(enable_status);
+    //ui->chgbox_basic_FT_btn->setEnabled(enable_status);
+    //ui->chgbox_wSN_btn->setEnabled(enable_status);
+    //ui->chbox_r_sn_btn->setEnabled(enable_status);
+    ui->tabWidget->setEnabled(enable_status);
 }
 
 void MainWindow::on_openCloseBtn_clicked()
@@ -270,7 +272,7 @@ int MainWindow::sendHexMsg(QByteArray hexdata)
         QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
         QString timeStrLine= "[" + ts + "]";
         QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
-        QString content = "<span style=\" color:green;\">" + timeStrLine + tmpstr + hexArray2String(hexdata) +"\n\r</span>";
+        QString content = "<span style=\" color:green;\">" + timeStrLine + tmpstr + hexArray2StringPlusSpace(hexdata) +"\n\r</span>";
         ui->rawDataBrowser->append(content);
         //ui->textBrowser->setTextColor(Qt::lightGray);
     }
@@ -289,7 +291,7 @@ void MainWindow::recv_com_data()
 
     //ui->textBrowser->setTextColor(Qt::black);
     if(ui->hexRecvRadioBtn->isChecked()){
-        asciidata = hexArray2String(hexdata);
+        asciidata = hexArray2StringPlusSpace(hexdata);
     }
     else {
         asciidata = hexdata;
@@ -356,6 +358,15 @@ void MainWindow::on_chbox_r_sn_btn_clicked()
     QByteArray hexcmd;
     if (RET_OK == construct_chgbox_ft_r_sn_cmd(hexcmd) ) {
         sendHexMsg(hexcmd);
+    }
+}
+
+
+void MainWindow::on_r_mac_btn_clicked()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_read_mac_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
     }
 }
 

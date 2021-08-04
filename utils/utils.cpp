@@ -25,7 +25,7 @@ int string2HexArray(const QString &str, QByteArray &hexArr)
     return RET_OK;
 }
 
-QString hexArray2String(const QByteArray &hexArr)
+QString hexArray2StringPlusSpace(const QByteArray &hexArr)
 {
     QString str;
     for(int i = 0; i < hexArr.count(); i++){

@@ -48,6 +48,8 @@ private slots:
 
     void on_chbox_r_sn_btn_clicked();
 
+    void on_r_mac_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 

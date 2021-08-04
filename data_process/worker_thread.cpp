@@ -1,6 +1,7 @@
 #include "worker_thread.h"
 #include "utils/utils.h"
 #include "chgbox/chgbox.h"
+#include "earbud/earbud.h"
 
 #include <QDebug>
 #include <QThread>
@@ -25,6 +26,7 @@ SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
     }
 
     chgbox_initialize_parse_func_list(parse_map);
+    earbud_initialize_parse_func_list(parse_map);
 }
 
 SerialPortWorker::~SerialPortWorker() {
@@ -34,12 +36,18 @@ SerialPortWorker::~SerialPortWorker() {
 
 void SerialPortWorker::doWork(const QByteArray hexdata) {
     //qDebug() << "SerialPortWorkerThread:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
-    if(hexdata.count() < 2) {
+    QJsonArray jsarr;
+    QString key;
+    key.clear();
+    if( is_rsp_from_chgbox(hexdata) ) {
+        key = chgbox_get_rsp_key(hexdata);
+    }
+    else {
+        key = earbud_get_rsp_key(hexdata);
+    }
+    if(key.isEmpty()) {
         return;
     }
-
-    QJsonArray jsarr;
-    const QString key =MAKE_STRING_UINT8_UINT8((uchar)hexdata[0], (uchar)hexdata[1]);
     parse_func_map_t::iterator it = parse_map.find(key);
     if(it != parse_map.end()) {
         it.value()(hexdata, jsarr);

@@ -324,6 +324,68 @@
       <attribute name="title">
        <string>耳机</string>
       </attribute>
+      <widget class="QPushButton" name="r_mac_btn">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>读mac地址</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>10</y>
+         <width>311</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="earside_lbl">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(255, 170, 255);
+color: rgb(0, 0, 0);
+font: 10pt &quot;黑体&quot;;</string>
+          </property>
+          <property name="text">
+           <string>选择耳机</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="earside_left_rbtn">
+          <property name="text">
+           <string>左</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="earside_right_rbtn">
+          <property name="text">
+           <string>右</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">

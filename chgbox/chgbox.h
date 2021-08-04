@@ -25,6 +25,9 @@
 #define CHGBOX_FT_R_SN_RSP_FC  0x3F
 #define CHGBOX_FT_R_SN_RSP_LEN 13
 
+bool is_rsp_from_chgbox(const QByteArray &hexdata);
+QString chgbox_get_rsp_key(const QByteArray &hexrsp);
+
 int chgbox_initialize_parse_func_list(parse_func_map_t &map);
 
 QByteArray construct_chgbox_basic_ft_cmd(bool led1, bool led2, bool led3, bool chg_mode);

@@ -28,6 +28,29 @@ int chgbox_initialize_parse_func_list(parse_func_map_t &map)
     return 0;
 }
 
+
+bool is_rsp_from_chgbox(const QByteArray &hexrsp)
+{
+    if( hexrsp.count() >= 2
+        && (uint8_t)hexrsp[0] == CHGBOX_FT_RSP_LEAD
+        && ( (uint8_t)hexrsp[1] == CHGBOX_BASIC_FT_RSP_FC || (uint8_t)hexrsp[1] == CHGBOX_FT_W_SN_RSP_FC || (uint8_t)hexrsp[1] == CHGBOX_FT_R_SN_RSP_FC )
+    ) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+QString chgbox_get_rsp_key(const QByteArray &hexrsp)
+{
+    QString key;
+    if(hexrsp.count() >= 2) {
+        key.sprintf("%02X%02X", hexrsp[0], hexrsp[1]);
+    }
+    return key;
+}
+
 typedef struct {
     uint8_t LEAD;
     uint8_t FC;
@@ -268,7 +291,7 @@ int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonArray &jsarr, bool rw_flag)
 
     k = "SN";
     QByteArray tmparr(hexdata.data() + 2, CHGBOX_FT_SN_LEN);
-    v = hexArray2String(tmparr);
+    v = hexArray2StringPlusSpace(tmparr);
     addInfo2Array(jsarr, k, v, false);
 
     return RET_OK;
