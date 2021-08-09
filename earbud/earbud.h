@@ -26,5 +26,16 @@ int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr
 int earbud_construct_read_temperature_cmd(QByteArray &cmd, uint8_t earside);
 int earbud_parse_read_temperature_notify(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construct_cmd_set_license_key(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_set_license_key(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construct_cmd_get_license_result(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_get_license_result(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construct_cmd_get_license_key(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_get_license_key(const QByteArray hexdata, QJsonArray &jsarr);
+
+
+
 
 #endif // EARBUD_H

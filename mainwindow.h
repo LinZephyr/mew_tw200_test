@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTimer>
 
 #include "qextserial/qextserialport.h"
 
@@ -19,6 +20,7 @@
 //载入文件最大长度限制在MAX_FILE_SIZE字节内
 #define MAX_FILE_SIZE 10000
 
+#define  TIMER_INTERVAL_SEND_COMMAND  600
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,6 +43,10 @@ private slots:
     void recv_com_data();
     void handleResults(QJsonArray jsarr);
 
+    void get_license_key();
+    void set_license_key();
+    void get_license_result();
+
     void on_comCheckBtn_clicked();
     void on_clearUpBtn_clicked();
     void on_chgbox_basic_FT_btn_clicked();
@@ -55,6 +61,8 @@ private slots:
     void on_r_channel_btn_clicked();
 
     void on_r_ntc_btn_clicked();
+
+    void on_r_active_license_btn_clicked();
 
 signals:
     void dataReceived(QByteArray hexdata);
@@ -75,6 +83,7 @@ protected:
     void read_fw_ver_addr();
     void read_channel();
     void read_temperature();
+
 
 private:
     Ui::MainWindow *ui;

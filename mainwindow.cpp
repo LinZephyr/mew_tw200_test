@@ -407,3 +407,34 @@ void MainWindow::on_r_ntc_btn_clicked()
     read_temperature();
 }
 
+void MainWindow::get_license_key()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_get_license_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::set_license_key()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_set_license_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+    QTimer::singleShot(TIMER_INTERVAL_SEND_COMMAND, this, SLOT(get_license_result()));
+}
+
+void MainWindow::get_license_result()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_get_license_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::on_r_active_license_btn_clicked()
+{
+    get_license_key();
+    QTimer::singleShot(TIMER_INTERVAL_SEND_COMMAND, this, SLOT(set_license_key()));
+}
+
