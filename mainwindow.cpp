@@ -363,7 +363,7 @@ void MainWindow::on_r_mac_btn_clicked()
 void MainWindow::read_mac_addr()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_read_mac_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construct_cmd_read_mac(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -371,7 +371,7 @@ void MainWindow::read_mac_addr()
 void MainWindow::read_fw_ver_addr()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_read_version_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construct_cmd_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -384,7 +384,7 @@ void MainWindow::on_r_fw_ver_btn_clicked()
 void MainWindow::read_channel()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_read_channel_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construct_cmd_read_channel(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -397,7 +397,7 @@ void MainWindow::on_r_channel_btn_clicked()
 void MainWindow::read_temperature()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_read_temperature_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construct_cmd_read_temperature(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }

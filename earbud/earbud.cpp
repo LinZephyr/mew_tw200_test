@@ -19,10 +19,10 @@
 #define RACE_USR_ID2 0x20
 #define RACE_ID_LEN 2
 
-#define EARBUD_PAYLOAD_MAC_LENGTH 6
-#define EARBUD_PAYLOAD_VERSION_LENGTH 7
-#define EARBUD_PAYLOAD_CHANNEL_LENGTH 1
-#define EARBUD_PAYLOAD_TEMPERATURE_LENGTH 4
+#define EARBUD_PAYLOAD_LENGTH_MAC 6
+#define EARBUD_PAYLOAD_LENGTH_VERSION 7
+#define EARBUD_PAYLOAD_LENGTH_CHANNEL 1
+#define EARBUD_PAYLOAD_LENGTH_TEMPERATURE 4
 #define EARBUD_PAYLOAD_LENGTH_SET_LICENSE_KEY 1
 #define EARBUD_PAYLOAD_LENGTH_GET_LICENSE_RESULT 1
 #define EARBUD_PAYLOAD_LENGTH_GET_LICENSE_KEY 1
@@ -40,10 +40,10 @@
 
 QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_read_mac_notify},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION), earbud_parse_read_version_notify},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL), earbud_parse_read_channel_notify},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_TEMPERATURE), earbud_parse_read_temperature_notify},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_notify_read_mac},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION), earbud_parse_notify_read_version},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL), earbud_parse_notify_read_channel},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_TEMPERATURE), earbud_parse_notify_read_temperature},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_LICENSE_KEY), earbud_parse_notify_set_license_key},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_RESULT), earbud_parse_notify_get_license_result},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_KEY), earbud_parse_notify_get_license_key},
@@ -180,23 +180,23 @@ void earbud_construct_cmd(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uin
     assert(earbud_vbus_cmd_length_field_is_valid(cmd_arr, 0));
 }
 
-int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside)
+int earbud_construct_cmd_read_mac(QByteArray &cmd, uint8_t earside)
 {
     earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC, earside);
     return 0;
 }
 
-int earbud_parse_read_mac_notify(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_read_mac(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读耳机MAC地址";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_MAC_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_MAC, topic, jsarr)) {
         return RET_FAIL;
     }
 
     //jsarr.append(topic);
     QJsonObject jsobj;
     QByteArray mac_array;
-    for(int i = 0; i < EARBUD_PAYLOAD_MAC_LENGTH; ++i) {
+    for(int i = 0; i < EARBUD_PAYLOAD_LENGTH_MAC; ++i) {
         mac_array.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
     QString mac_str = hexArray2StringPlusSpace(mac_array);
@@ -206,23 +206,23 @@ int earbud_parse_read_mac_notify(const QByteArray hexdata, QJsonArray &jsarr)
     return 0;
 }
 
-int earbud_construct_read_version_cmd(QByteArray &cmd, uint8_t earside)
+int earbud_construct_cmd_read_version(QByteArray &cmd, uint8_t earside)
 {
     earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION, earside);
     return 0;
 }
 
-int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_read_version(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读耳机版本";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_VERSION_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_VERSION, topic, jsarr)) {
         return RET_FAIL;
     }
 
     //jsarr.append(topic);
     QJsonObject jsobj;
     QString verStr;
-    for(int i = 0; i < EARBUD_PAYLOAD_VERSION_LENGTH; ++i) {
+    for(int i = 0; i < EARBUD_PAYLOAD_LENGTH_VERSION; ++i) {
         verStr.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
     jsobj.insert(topic, verStr);
@@ -231,16 +231,16 @@ int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr
     return 0;
 }
 
-int earbud_construct_read_channel_cmd(QByteArray &cmd, uint8_t earside)
+int earbud_construct_cmd_read_channel(QByteArray &cmd, uint8_t earside)
 {
     earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL, earside);
     return 0;
 }
 
-int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_read_channel(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读耳机声道";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_CHANNEL_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CHANNEL, topic, jsarr)) {
         return RET_FAIL;
     }
 
@@ -252,16 +252,16 @@ int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr
     return 0;
 }
 
-int earbud_construct_read_temperature_cmd(QByteArray &cmd, uint8_t earside)
+int earbud_construct_cmd_read_temperature(QByteArray &cmd, uint8_t earside)
 {
     earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_TEMPERATURE, earside);
     return 0;
 }
 
-int earbud_parse_read_temperature_notify(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_read_temperature(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读NTC温度";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_TEMPERATURE_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_TEMPERATURE, topic, jsarr)) {
         return RET_FAIL;
     }
 
