@@ -357,9 +357,13 @@ void MainWindow::on_chbox_r_sn_btn_clicked()
 
 void MainWindow::on_r_mac_btn_clicked()
 {
+    read_mac_addr();
+}
+
+void MainWindow::read_mac_addr()
+{
     QByteArray cmd;
     if(RET_OK == earbud_construct_read_mac_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
-

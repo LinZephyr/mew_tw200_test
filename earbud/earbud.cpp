@@ -19,12 +19,12 @@
 #define RACE_USR_ID2 0x20
 #define RACE_ID_LEN 2
 
-#define EARBUD_CMD_CODE_READ_MAC 0x2E
-#define EARBUD_CMD_KEY_READ_MAC  "00202E"
+#define EARBUD_CMD_READ_MAC 0x2E
 #define EARBUD_MAC_LENGTH 6
 
+QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
-    {EARBUD_CMD_KEY_READ_MAC, earbud_parse_read_mac_notification},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_read_mac_notification},
 };
 
 int earbud_initialize_parse_func_list(parse_func_map_t &map)
@@ -40,6 +40,13 @@ int earbud_initialize_parse_func_list(parse_func_map_t &map)
     }
 
     return 0;
+}
+
+QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd)
+{
+    QString str;
+    str.sprintf("%02X%02X%02X", usr_id1, usr_id2, cmd);
+    return str;
 }
 
 typedef struct {
@@ -124,7 +131,7 @@ int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside)
     header.race_len2 = 4;
     header.race_id1 = RACE_USR_ID1;
     header.race_id2 = RACE_USR_ID2;
-    header.race_cmd = EARBUD_CMD_CODE_READ_MAC;
+    header.race_cmd = EARBUD_CMD_READ_MAC;
     header.race_earside = earside;
 
     cmd.append((const char*)&header, sizeof(header));

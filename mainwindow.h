@@ -65,6 +65,8 @@ protected:
     void setRelatedWidgetsStatus(bool opened);
     void setComWidgetsStatus(bool opened);
 
+    void read_mac_addr();
+
 private:
     Ui::MainWindow *ui;
     QThread comWorkerThread;
