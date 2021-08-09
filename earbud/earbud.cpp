@@ -19,12 +19,13 @@
 #define RACE_USR_ID2 0x20
 #define RACE_ID_LEN 2
 
-#define EARBUD_MAC_LENGTH 6
-#define EARBUD_VERSION_LENGTH 7
+#define EARBUD_PAYLOAD_MAC_LENGTH 6
+#define EARBUD_PAYLOAD_VERSION_LENGTH 7
+#define EARBUD_PAYLOAD_CHANNEL_LENGTH 1
 
 #define EARBUD_CMD_READ_MAC 0x2E
 #define EARBUD_CMD_READ_VERSION 0x23
-
+#define EARBUD_CMD_READ_CHANNEL 0x69
 
 
 
@@ -32,6 +33,7 @@ QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_read_mac_notify},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION), earbud_parse_read_version_notify},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL), earbud_parse_read_channel_notify},
 };
 
 int earbud_initialize_parse_func_list(parse_func_map_t &map)
@@ -174,14 +176,14 @@ int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside)
 int earbud_parse_read_mac_notify(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读耳机MAC地址";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_MAC_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_MAC_LENGTH, topic, jsarr)) {
         return RET_FAIL;
     }
 
     jsarr.append(topic);
     QJsonObject jsobj;
     QByteArray mac_array;
-    for(int i = 0; i < EARBUD_MAC_LENGTH; ++i) {
+    for(int i = 0; i < EARBUD_PAYLOAD_MAC_LENGTH; ++i) {
         mac_array.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
     QString mac_str = hexArray2StringPlusSpace(mac_array);
@@ -200,14 +202,14 @@ int earbud_construct_read_version_cmd(QByteArray &cmd, uint8_t earside)
 int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "读耳机版本";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_VERSION_LENGTH, topic, jsarr)) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_VERSION_LENGTH, topic, jsarr)) {
         return RET_FAIL;
     }
 
     jsarr.append(topic);
     QJsonObject jsobj;
     QString verStr;
-    for(int i = 0; i < EARBUD_VERSION_LENGTH; ++i) {
+    for(int i = 0; i < EARBUD_PAYLOAD_VERSION_LENGTH; ++i) {
         verStr.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
     jsobj.insert("耳机版本", verStr);
@@ -215,4 +217,34 @@ int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr
 
     return 0;
 }
+
+int earbud_construct_read_channel_cmd(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL, earside);
+    return 0;
+}
+
+int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "读耳机声道";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_CHANNEL_LENGTH, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    jsarr.append(topic);
+    QJsonObject jsobj;
+    jsobj.insert("耳机声道", hexdata[sizeof(earbud_vbus_notify_header_t)] == EARSIDE_LEFT ? "左" : "右");
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
 

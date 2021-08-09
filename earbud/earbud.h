@@ -20,6 +20,7 @@ int earbud_parse_read_mac_notify(const QByteArray hexdata, QJsonArray &jsarr);
 int earbud_construct_read_version_cmd(QByteArray &cmd, uint8_t earside);
 int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr);
 
-
+int earbud_construct_read_channel_cmd(QByteArray &cmd, uint8_t earside);
+int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr);
 
 #endif // EARBUD_H

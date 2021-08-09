@@ -381,3 +381,16 @@ void MainWindow::on_r_fw_ver_btn_clicked()
     read_fw_ver_addr();
 }
 
+void MainWindow::read_channel()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_read_channel_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::on_r_channel_btn_clicked()
+{
+    read_channel();
+}
+
