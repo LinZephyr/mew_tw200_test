@@ -16,5 +16,9 @@ QString earbud_get_rsp_key(const QByteArray &hexrsp);
 int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside);
 int earbud_parse_read_mac_notification(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construct_read_version_cmd(QByteArray &cmd, uint8_t earside);
+int earbud_parse_read_version_notification(const QByteArray hexdata, QJsonArray &jsarr);
+
+
 
 #endif // EARBUD_H

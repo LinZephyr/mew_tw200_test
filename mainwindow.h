@@ -50,6 +50,8 @@ private slots:
 
     void on_r_mac_btn_clicked();
 
+    void on_r_fw_ver_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -66,6 +68,7 @@ protected:
     void setComWidgetsStatus(bool opened);
 
     void read_mac_addr();
+    void read_fw_ver_addr();
 
 private:
     Ui::MainWindow *ui;
