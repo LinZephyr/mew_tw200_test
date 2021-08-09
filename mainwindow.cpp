@@ -326,28 +326,21 @@ void MainWindow::on_chgbox_basic_FT_btn_clicked()
 
 void MainWindow::on_chgbox_wSN_btn_clicked()
 {
-    QString strSN = ui->chgbox_SN_edit->text();
+    QString snStr = ui->chgbox_SN_edit->text();
 
     //如果发送数据为空，给出提示并返回
-    if(strSN.isEmpty()){
+    if(snStr.isEmpty()){
         //QMessageBox::information(this, tr("提示消息"), tr("没有需要发送的数据"), QMessageBox::Ok);
         return;
     }
 
-    QByteArray hexSN;
-    if(RET_OK != string2HexArray(strSN, hexSN)) {
+    QByteArray hexcmd;
+    if (RET_OK == construct_chgbox_ft_w_sn_cmd(snStr, hexcmd) ) {
+        sendHexMsg(hexcmd);
+    }
+    else {
         QMessageBox::information(this, tr("提示消息"), tr("输入的数据格式有错误！"), QMessageBox::Ok);
         return;
-    }
-
-    if( CHGBOX_FT_SN_LEN > hexSN.count()) {
-        QMessageBox::information(this, tr("提示消息"), tr("SN数据长度不够！"), QMessageBox::Ok);
-        return;
-    }
-
-    QByteArray hexcmd;
-    if (RET_OK == construct_chgbox_ft_w_sn_cmd(hexSN, hexcmd) ) {
-        sendHexMsg(hexcmd);
     }
 
 }

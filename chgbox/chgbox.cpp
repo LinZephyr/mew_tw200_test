@@ -37,13 +37,6 @@ static parse_func_list_t chgbox_parse_func_list = {
     {chgbox_make_key(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_R_SN_RSP_FC),  parse_chgbox_ft_r_sn_rsp},
 };
 
-QString chgbox_make_key(uint8_t lead, uint8_t fc)
-{
-    QString str;
-    str.sprintf("%02X%02X", lead, fc);
-    return str;
-}
-
 int chgbox_initialize_parse_func_list(parse_func_map_t &map)
 {
     for(parse_func_list_t::const_iterator it = chgbox_parse_func_list.begin(); it != chgbox_parse_func_list.end(); ++it) {
@@ -58,7 +51,6 @@ int chgbox_initialize_parse_func_list(parse_func_map_t &map)
 
     return 0;
 }
-
 
 bool is_rsp_from_chgbox(const QByteArray &hexrsp)
 {
@@ -80,6 +72,13 @@ QString chgbox_get_rsp_key(const QByteArray &hexrsp)
         key.sprintf("%02X%02X", (uint8_t)hexrsp[0], (uint8_t)hexrsp[1]);
     }
     return key;
+}
+
+QString chgbox_make_key(uint8_t lead, uint8_t fc)
+{
+    QString str;
+    str.sprintf("%02X%02X", lead, fc);
+    return str;
 }
 
 typedef struct {
@@ -247,9 +246,9 @@ typedef struct {
     uint8_t crc;
 } chgbox_ft_w_sn_rsp_t;
 
-int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd)
+int construct_chgbox_ft_w_sn_cmd(const QString snStr, QByteArray &hexcmd)
 {
-    if(CHGBOX_FT_SN_LEN > SN.count()) {
+    if((CHGBOX_FT_SN_LEN - 1) > snStr.length()) {
         qWarning() << "充电仓厂测SN命令长度不够！";
         return RET_FAIL;
     }
@@ -257,7 +256,19 @@ int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd)
 
     hexcmd.append(CHGBOX_FT_CMD_LEAD);
     hexcmd.append(CHGBOX_FT_W_SN_CMD_FC);
-    hexcmd.append(SN);
+    hexcmd.append(BAT_BRAND_DEFAULT);
+    for(int i = 0; i < CHGBOX_FT_SN_LEN - 1; ++i) {
+        QChar ch = snStr[i];
+        if(ch.isNumber() || ch.isLetter()) {
+            hexcmd.append(ch.toLatin1() - '0');
+        }
+        else {
+            QString warn;
+            warn.sprintf("%s, '%c' is not a valid number", __FUNCTION__, ch.toLatin1());
+            qDebug() << warn;
+            return RET_FAIL;
+        }
+    }
     hexcmd.append(calcCRC8(0, (uint8_t *)hexcmd.data(), CHGBOX_FT_W_SN_CMD_LEN - 1));
 
     return RET_OK;

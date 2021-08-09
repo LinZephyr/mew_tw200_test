@@ -15,7 +15,7 @@ int chgbox_initialize_parse_func_list(parse_func_map_t &map);
 QByteArray construct_chgbox_basic_ft_cmd(bool led1, bool led2, bool led3, bool chg_mode);
 int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr);
 
-int construct_chgbox_ft_w_sn_cmd(const QByteArray SN, QByteArray &hexcmd);
+int construct_chgbox_ft_w_sn_cmd(const QString snStr, QByteArray &hexcmd);
 int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonArray &jsarr);
 
 int construct_chgbox_ft_r_sn_cmd(QByteArray &hexcmd);
