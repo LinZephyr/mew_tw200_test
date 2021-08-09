@@ -173,7 +173,7 @@ int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr)
     jsarr.append(topic);
 
     if (CHGBOX_BASIC_FT_RSP_LEN > hexdata.count()) {
-        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度不够！", true);
+        addInfo2Array(jsarr, MARK_STR_KEY_EXCEPTION, "回复数据长度不够！", true);
         return RET_FAIL;
     }
 
@@ -285,7 +285,7 @@ int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonArray &jsarr, bool rw_flag)
     if(crc_recv != crc_calc) {
         QString errval;
         errval.sprintf("SN CRC8校验码错误！收到CRC8:0x%X, 计算CRC8:0x%X", crc_recv, crc_calc);
-        addInfo2Array(jsarr, ERR_KEY_STR, errval, true);
+        addInfo2Array(jsarr, MARK_STR_KEY_EXCEPTION, errval, true);
         return RET_FAIL;
     }
 
@@ -345,7 +345,7 @@ int parse_chgbox_ft_w_sn_rsp(const QByteArray hexdata, QJsonArray &jsarr)
     jsarr.append(topic);
 
     if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
-        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度不够！", true);
+        addInfo2Array(jsarr, MARK_STR_KEY_EXCEPTION, "回复数据长度不够！", true);
         return RET_FAIL;
     }
 
@@ -366,7 +366,7 @@ int parse_chgbox_ft_r_sn_rsp(const QByteArray hexdata, QJsonArray &jsarr)
     jsarr.append(topic);
 
     if(CHGBOX_FT_W_SN_RSP_LEN > hexdata.count()) {
-        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度不够！", true);
+        addInfo2Array(jsarr, MARK_STR_KEY_EXCEPTION, "回复数据长度不够！", true);
         return RET_FAIL;
     }
 

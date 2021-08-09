@@ -78,7 +78,7 @@ void MainWindow::handleResults(QJsonArray jsarr)
             for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
                 QString k = obj_it.key();
                 QJsonValue v = obj_it.value();
-                if(k.contains(ERR_KEY_STR)) {
+                if(k.contains(MARK_STR_KEY_EXCEPTION)) {
                     QColor cl = ui->parsedDataBrowser->textColor();
                     ui->parsedDataBrowser->setTextColor(Qt::red);
                     ui->parsedDataBrowser->append(k + " : " + jsonValue2String(v) );
@@ -436,5 +436,18 @@ void MainWindow::on_r_active_license_btn_clicked()
 {
     get_license_key();
     QTimer::singleShot(TIMER_INTERVAL_SEND_COMMAND, this, SLOT(set_license_key()));
+}
+
+void MainWindow::start_calib_captouch()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_calibrate_captouch(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::on_start_calib_captouch_btn_clicked()
+{
+    start_calib_captouch();
 }
 

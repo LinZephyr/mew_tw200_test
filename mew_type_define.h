@@ -20,7 +20,10 @@ typedef std::initializer_list<parse_func_pair_t> parse_func_list_t;
 
 //#define MAKE_STRING_UINT8_UINT8(U8_1, U8_2) QString::number(((uint16_t)U8_1 << 8)|(uint16_t)U8_2, 16)
 
-#define ERR_KEY_STR "异常"
+#define MARK_STR_KEY_EXCEPTION  "异常"
+#define MARK_STR_VALUE_SUCCESS  "成功"
+#define MARK_STR_VALUE_FAIL     "失败"
+
 #define addInfo2Array(jsarr, k, v, print) do \
     {\
         QJsonObject tmpobj;\

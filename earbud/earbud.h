@@ -35,7 +35,8 @@ int earbud_parse_notify_get_license_result(const QByteArray hexdata, QJsonArray 
 int earbud_construct_cmd_get_license_key(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_get_license_key(const QByteArray hexdata, QJsonArray &jsarr);
 
-
+int earbud_construct_cmd_calibrate_captouch(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_calibrate_captouch(const QByteArray hexdata, QJsonArray &jsarr);
 
 
 #endif // EARBUD_H
