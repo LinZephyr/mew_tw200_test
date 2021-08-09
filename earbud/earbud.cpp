@@ -13,7 +13,7 @@
 #define RACE_TYPE_RSP 0x5B
 // indication don't need response from the other side.
 #define RACE_TYPE_IND 0x5C
-#define RACE_TYPE_NOTIFICATION 0x5D
+#define RACE_TYPE_NOTIFY 0x5D
 
 #define RACE_USR_ID1 0
 #define RACE_USR_ID2 0x20
@@ -30,8 +30,8 @@
 
 QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_read_mac_notification},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION), earbud_parse_read_version_notification},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC), earbud_parse_read_mac_notify},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION), earbud_parse_read_version_notify},
 };
 
 int earbud_initialize_parse_func_list(parse_func_map_t &map)
@@ -70,7 +70,7 @@ typedef struct {
     uint8_t race_cmd;
     uint8_t race_earside;
 } earbud_vbus_cmd_header_t;
-typedef earbud_vbus_cmd_header_t earbud_vbus_rsp_header_t;
+typedef earbud_vbus_cmd_header_t earbud_vbus_notify_header_t;
 
 uint32_t calc_length_little_end(uint32_t len1, uint32_t len2)
 {
@@ -83,7 +83,7 @@ uint32_t calc_length_big_end(uint32_t len1, uint32_t len2)
 }
 
 
-bool earbud_vbus_is_cmd_length_field_valid(const QByteArray &hexdata, uint32_t payload_len)
+bool earbud_vbus_cmd_length_field_is_valid(const QByteArray &hexdata, uint32_t payload_len)
 {
     earbud_vbus_cmd_header_t *header = (earbud_vbus_cmd_header_t *)hexdata.data();
     unsigned int hex_bytes = (unsigned int)hexdata.count();
@@ -97,12 +97,25 @@ bool earbud_vbus_is_cmd_length_field_valid(const QByteArray &hexdata, uint32_t p
     return hex_bytes >= vlen + 4 && vlen == rlen + 4;
 }
 
-bool earbud_vbus_rsp_length_field_is_valid(const QByteArray &hexdata, uint32_t payload_len)
+bool is_notify_from_earbud(const QByteArray &hexdata)
 {
-    earbud_vbus_rsp_header_t *header = (earbud_vbus_rsp_header_t *)hexdata.data();
+    earbud_vbus_notify_header_t *header = (earbud_vbus_notify_header_t *)hexdata.data();
+    unsigned int hex_bytes = (unsigned int)hexdata.count();
+    if(hex_bytes >= sizeof(earbud_vbus_notify_header_t)
+            && header->race_type == RACE_TYPE_NOTIFY
+        ) {
+        return true;
+    }
+
+    return false;
+}
+
+bool earbud_vbus_notify_length_field_is_valid(const QByteArray &hexdata, uint32_t payload_len)
+{
+    earbud_vbus_notify_header_t *header = (earbud_vbus_notify_header_t *)hexdata.data();
     unsigned int hex_bytes = (unsigned int)hexdata.count();
 
-    if(hex_bytes < sizeof(earbud_vbus_rsp_header_t) + payload_len) {
+    if(hex_bytes < sizeof(earbud_vbus_notify_header_t) + payload_len) {
         return false;
     }
 
@@ -111,116 +124,93 @@ bool earbud_vbus_rsp_length_field_is_valid(const QByteArray &hexdata, uint32_t p
     return hex_bytes >= vlen + 4 && vlen == rlen + 4;
 }
 
-
-
-QString earbud_get_rsp_key(const QByteArray &hexrsp)
-{
-    QString key;
-    if((uint32_t)hexrsp.count() >= sizeof(earbud_vbus_rsp_header_t)) {
-        earbud_vbus_rsp_header_t *rsp = (earbud_vbus_rsp_header_t *)hexrsp.data();
-        key.sprintf("%02X%02X%02X", (uint8_t)rsp->race_id1, (uint8_t)rsp->race_id2, (uint8_t)rsp->race_cmd);
+int earbud_vbus_notify_check_format(const QByteArray &hexdata, uint32_t payload_len, QString &topic, QJsonArray &jsarr) {
+    earbud_vbus_notify_header_t *header = (earbud_vbus_notify_header_t *)hexdata.data();
+    if(!earbud_vbus_notify_length_field_is_valid(hexdata, payload_len)) {
+        jsarr.append(topic);
+        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度检查错误！", true);
+        return RET_FAIL;
     }
 
+    topic += (EARSIDE_LEFT == header->race_earside) ? " (左)" : " (右)";
+    return RET_OK;
+}
+
+QString earbud_get_notify_key(const QByteArray &hexdata)
+{
+    QString key;
+    earbud_vbus_notify_header_t *notify = (earbud_vbus_notify_header_t *)hexdata.data();
+    key.sprintf("%02X%02X%02X", (uint8_t)notify->race_id1, (uint8_t)notify->race_id2, (uint8_t)notify->race_cmd);
     return key;
 }
 
-int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside)
+void earbud_construct_cmd(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uint8_t rlen1, uint8_t rlen2, uint8_t race_id1, uint8_t race_id2, uint8_t cmd, uint8_t earside)
 {
     earbud_vbus_cmd_header_t header;
 
     header.vbus_lead1 = EARBUD_LEAD1;
     header.vbus_lead2 = EARBUD_LEAD2;
-    header.vbus_len1 = 0;
-    header.vbus_len2 = 8;
+    header.vbus_len1 = vlen1;
+    header.vbus_len2 = vlen2;
     header.race_channel = RACE_CHANNEL;
     header.race_type = RACE_TYPE_CMD;
-    header.race_len1 = 0;
-    header.race_len2 = 4;
-    header.race_id1 = RACE_USR_ID1;
-    header.race_id2 = RACE_USR_ID2;
-    header.race_cmd = EARBUD_CMD_READ_MAC;
+    header.race_len1 = rlen1;
+    header.race_len2 = rlen2;
+    header.race_id1 = race_id1;
+    header.race_id2 = race_id2;
+    header.race_cmd = cmd;
     header.race_earside = earside;
 
-    cmd.append((const char*)&header, sizeof(header));
-    assert(earbud_vbus_is_cmd_length_field_valid(cmd, 0));
+    cmd_arr.append((const char*)&header, sizeof(header));
+    assert(earbud_vbus_cmd_length_field_is_valid(cmd_arr, 0));
+}
+
+int earbud_construct_read_mac_cmd(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC, earside);
     return 0;
 }
 
-int earbud_parse_read_mac_notification(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_read_mac_notify(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    earbud_vbus_rsp_header_t *header = (earbud_vbus_rsp_header_t *)hexdata.data();
-    QString topic = "读mac地址";
-
-    if((uint32_t)hexdata.count() >= sizeof(earbud_vbus_rsp_header_t) && header->race_type != RACE_TYPE_NOTIFICATION) {
+    QString topic = "读耳机MAC地址";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_MAC_LENGTH, topic, jsarr)) {
         return RET_FAIL;
     }
 
-    if(!earbud_vbus_rsp_length_field_is_valid(hexdata, EARBUD_MAC_LENGTH)) {
-        jsarr.append(topic);
-        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度域错误！", true);
-        return RET_FAIL;
-    }
-
-    topic += (EARSIDE_LEFT == header->race_earside) ? "读MAC地址__左" : "读mac地址__右";
     jsarr.append(topic);
     QJsonObject jsobj;
     QByteArray mac_array;
     for(int i = 0; i < EARBUD_MAC_LENGTH; ++i) {
-        mac_array.append(hexdata[sizeof(earbud_vbus_rsp_header_t) + i]);
+        mac_array.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
     QString mac_str = hexArray2StringPlusSpace(mac_array);
     jsobj.insert("MAC", mac_str);
     jsarr.append(jsobj);
-
 
     return 0;
 }
 
 int earbud_construct_read_version_cmd(QByteArray &cmd, uint8_t earside)
 {
-    earbud_vbus_cmd_header_t header;
-
-    header.vbus_lead1 = EARBUD_LEAD1;
-    header.vbus_lead2 = EARBUD_LEAD2;
-    header.vbus_len1 = 0;
-    header.vbus_len2 = 8;
-    header.race_channel = RACE_CHANNEL;
-    header.race_type = RACE_TYPE_CMD;
-    header.race_len1 = 0;
-    header.race_len2 = 4;
-    header.race_id1 = RACE_USR_ID1;
-    header.race_id2 = RACE_USR_ID2;
-    header.race_cmd = EARBUD_CMD_READ_VERSION;
-    header.race_earside = earside;
-
-    cmd.append((const char*)&header, sizeof(header));
-    assert(earbud_vbus_is_cmd_length_field_valid(cmd, 0));
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION, earside);
     return 0;
 }
 
-int earbud_parse_read_version_notification(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    earbud_vbus_rsp_header_t *header = (earbud_vbus_rsp_header_t *)hexdata.data();
     QString topic = "读耳机版本";
-
-    if((uint32_t)hexdata.count() >= sizeof(earbud_vbus_rsp_header_t) && header->race_type != RACE_TYPE_NOTIFICATION) {
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_VERSION_LENGTH, topic, jsarr)) {
         return RET_FAIL;
     }
 
-    if(!earbud_vbus_rsp_length_field_is_valid(hexdata, EARBUD_MAC_LENGTH)) {
-        jsarr.append(topic);
-        addInfo2Array(jsarr, ERR_KEY_STR, "回复数据长度域错误！", true);
-        return RET_FAIL;
-    }
-
-    topic += (EARSIDE_LEFT == header->race_earside) ? "__左" : "__右";
     jsarr.append(topic);
     QJsonObject jsobj;
     QString verStr;
     for(int i = 0; i < EARBUD_VERSION_LENGTH; ++i) {
-        verStr.append(hexdata[sizeof(earbud_vbus_rsp_header_t) + i]);
+        verStr.append(hexdata[sizeof(earbud_vbus_notify_header_t) + i]);
     }
-    jsobj.insert("MAC", verStr);
+    jsobj.insert("耳机版本", verStr);
     jsarr.append(jsobj);
 
     return 0;
