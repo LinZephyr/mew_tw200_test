@@ -161,7 +161,7 @@ int earbud_parse_read_mac_notification(const QByteArray hexdata, QJsonArray &jsa
         return RET_FAIL;
     }
 
-    topic = (EARSIDE_LEFT == header->race_earside) ? "读左耳MAC地址" : "读右耳mac地址";
+    topic += (EARSIDE_LEFT == header->race_earside) ? "读MAC地址__左" : "读mac地址__右";
     jsarr.append(topic);
     QJsonObject jsobj;
     QByteArray mac_array;
@@ -213,7 +213,7 @@ int earbud_parse_read_version_notification(const QByteArray hexdata, QJsonArray 
         return RET_FAIL;
     }
 
-    topic = (EARSIDE_LEFT == header->race_earside) ? "读左耳版本" : "读右耳版本";
+    topic += (EARSIDE_LEFT == header->race_earside) ? "__左" : "__右";
     jsarr.append(topic);
     QJsonObject jsobj;
     QString verStr;
