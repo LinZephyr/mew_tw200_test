@@ -30,12 +30,19 @@
 #define CHGBOX_SN_FLAG_R  1
 
 //int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonArray &jsarr, bool rw_flag);
-
+QString chgbox_make_key(uint8_t lead, uint8_t fc);
 static parse_func_list_t chgbox_parse_func_list = {
-    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_BASIC_FT_RSP_FC),  parse_chgbox_basic_ft_rsp},
-    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_W_SN_RSP_FC),  parse_chgbox_ft_w_sn_rsp},
-    {MAKE_STRING_UINT8_UINT8(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_R_SN_RSP_FC),  parse_chgbox_ft_r_sn_rsp},
+    {chgbox_make_key(CHGBOX_FT_RSP_LEAD, CHGBOX_BASIC_FT_RSP_FC),  parse_chgbox_basic_ft_rsp},
+    {chgbox_make_key(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_W_SN_RSP_FC),  parse_chgbox_ft_w_sn_rsp},
+    {chgbox_make_key(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_R_SN_RSP_FC),  parse_chgbox_ft_r_sn_rsp},
 };
+
+QString chgbox_make_key(uint8_t lead, uint8_t fc)
+{
+    QString str;
+    str.sprintf("%02X%02X", lead, fc);
+    return str;
+}
 
 int chgbox_initialize_parse_func_list(parse_func_map_t &map)
 {
@@ -70,7 +77,7 @@ QString chgbox_get_rsp_key(const QByteArray &hexrsp)
 {
     QString key;
     if(hexrsp.count() >= 2) {
-        key.sprintf("%02x%02x", (uint8_t)hexrsp[0], (uint8_t)hexrsp[1]);
+        key.sprintf("%02X%02X", (uint8_t)hexrsp[0], (uint8_t)hexrsp[1]);
     }
     return key;
 }
