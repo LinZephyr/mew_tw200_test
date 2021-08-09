@@ -23,4 +23,8 @@ int earbud_parse_read_version_notify(const QByteArray hexdata, QJsonArray &jsarr
 int earbud_construct_read_channel_cmd(QByteArray &cmd, uint8_t earside);
 int earbud_parse_read_channel_notify(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construct_read_temperature_cmd(QByteArray &cmd, uint8_t earside);
+int earbud_parse_read_temperature_notify(const QByteArray hexdata, QJsonArray &jsarr);
+
+
 #endif // EARBUD_H

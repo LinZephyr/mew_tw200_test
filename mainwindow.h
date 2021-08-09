@@ -54,6 +54,8 @@ private slots:
 
     void on_r_channel_btn_clicked();
 
+    void on_r_ntc_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -72,6 +74,7 @@ protected:
     void read_mac_addr();
     void read_fw_ver_addr();
     void read_channel();
+    void read_temperature();
 
 private:
     Ui::MainWindow *ui;

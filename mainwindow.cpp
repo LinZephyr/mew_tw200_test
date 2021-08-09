@@ -394,3 +394,16 @@ void MainWindow::on_r_channel_btn_clicked()
     read_channel();
 }
 
+void MainWindow::read_temperature()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_read_temperature_cmd(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::on_r_ntc_btn_clicked()
+{
+    read_temperature();
+}
+
