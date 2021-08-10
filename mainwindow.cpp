@@ -321,6 +321,10 @@ void MainWindow::on_clearUpBtn_clicked()
     ui->rawDataBrowser->clear();
 }
 
+void MainWindow::on_clearUpBtn2_clicked()
+{
+    ui->parsedDataBrowser->clear();
+}
 
 void MainWindow::on_chgbox_basic_FT_btn_clicked()
 {
@@ -516,4 +520,7 @@ void MainWindow::on_captouch_test_btn_clicked()
 {
     QtConcurrent::run(this, &MainWindow::captouch_test);
 }
+
+
+
 

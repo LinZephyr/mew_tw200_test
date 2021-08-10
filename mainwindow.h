@@ -43,6 +43,7 @@ private slots:
 
     void on_comCheckBtn_clicked();
     void on_clearUpBtn_clicked();
+    void on_clearUpBtn2_clicked();
     void on_chgbox_basic_FT_btn_clicked();
     void on_chgbox_wSN_btn_clicked();
 
