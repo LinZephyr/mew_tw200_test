@@ -12,7 +12,7 @@
 #include <QDir>
 #include <QDateTime>
 
-static parse_func_map_t parse_map;
+parse_func_map_t parse_map;
 
 SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
     json_file(QDir::currentPath() + "/MEW-" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".json")
@@ -35,7 +35,9 @@ SerialPortWorker::~SerialPortWorker() {
 }
 
 void SerialPortWorker::doWork(const QByteArray hexdata) {
-    //qDebug() << "SerialPortWorkerThread:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
+#ifdef DUMP_THREAD_ID
+    qDebug() << "SerialPortWorkerThread:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
+#endif
     QJsonArray jsarr;
     QString key;
     key.clear();

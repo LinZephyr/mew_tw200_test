@@ -20,8 +20,6 @@
 //载入文件最大长度限制在MAX_FILE_SIZE字节内
 #define MAX_FILE_SIZE 10000
 
-#define  TIMER_INTERVAL_SEND_COMMAND  600
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -42,10 +40,6 @@ private slots:
 
     void recv_com_data();
     void handleResults(QJsonArray jsarr);
-
-    void get_license_key();
-    void set_license_key();
-    void get_license_result();
 
     void on_comCheckBtn_clicked();
     void on_clearUpBtn_clicked();
@@ -85,8 +79,9 @@ protected:
     void read_fw_ver_addr();
     void read_channel();
     void read_temperature();
-    void start_calib_captouch();
 
+    void active_license_key();
+    void start_calib_captouch();
 private:
     Ui::MainWindow *ui;
     QThread comWorkerThread;

@@ -5,6 +5,8 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+//#define DUMP_THREAD_ID
+
 #define RET_OK 0
 #define RET_FAIL -1
 
