@@ -77,4 +77,25 @@ int earbud_parse_notify_optic_bg_noise_start(const QByteArray hexdata, QJsonArra
 int earbud_construc_cmd_optic_bg_noise_end(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_optic_bg_noise_end(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_force_start_detect(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_start_detect(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_force_get_fw_ver(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_get_fw_ver(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_force_get_assemble(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_get_assemble(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_force_get_noise_peak(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_get_noise_peak(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_force_get_burst_pressure(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_get_burst_pressure(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_force_get_semph(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_force_get_semph(const QByteArray hexdata, QJsonArray &jsarr);
+
+
+
+
 #endif // EARBUD_H

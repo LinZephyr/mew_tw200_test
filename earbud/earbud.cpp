@@ -43,6 +43,12 @@
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_BG_NOISE_START      1
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_BG_NOISE_END        2
 
+#define EARBUD_PAYLOAD_LENGTH_FORCE_START_DETECT    1
+#define EARBUD_PAYLOAD_LENGTH_FORCE_GET_FW_VER      1
+#define EARBUD_PAYLOAD_LENGTH_FORCE_GET_ASSEMBLE    1
+#define EARBUD_PAYLOAD_LENGTH_FORCE_GET_NOISE_PEAK      2
+#define EARBUD_PAYLOAD_LENGTH_FORCE_GET_BURST_PRESSURE  2
+#define EARBUD_PAYLOAD_LENGTH_FORCE_GET_SEMPH           2
 
 #define EARBUD_CMD_READ_MAC             0x2E
 #define EARBUD_CMD_READ_VERSION         0x23
@@ -68,6 +74,12 @@
 #define EARBUD_CMD_OPTIC_BG_NOISE_START         0X93
 #define EARBUD_CMD_OPTIC_BG_NOISE_END           0X94
 
+#define EARBUD_CMD_FORCE_START_DETECT           0X87
+#define EARBUD_CMD_FORCE_GET_FW_VER             0X88
+#define EARBUD_CMD_FORCE_GET_ASSEMBLE           0X89
+#define EARBUD_CMD_FORCE_GET_NOISE_PEAK         0X8A
+#define EARBUD_CMD_FORCE_GET_BURST_PRESSURE     0X8B
+#define EARBUD_CMD_FORCE_GET_SEMPH              0X8C
 
 
 QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
@@ -95,6 +107,13 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE), earbud_parse_notify_optic_full_scale},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_START), earbud_parse_notify_optic_bg_noise_start},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_END), earbud_parse_notify_optic_bg_noise_end},
+
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_START_DETECT), earbud_parse_notify_force_start_detect },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_FW_VER), earbud_parse_notify_force_get_fw_ver },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_ASSEMBLE), earbud_parse_notify_force_get_assemble },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_NOISE_PEAK), earbud_parse_notify_force_get_noise_peak },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_BURST_PRESSURE), earbud_parse_notify_force_get_burst_pressure },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_SEMPH), earbud_parse_notify_force_get_semph },
 
 };
 
@@ -729,7 +748,146 @@ int earbud_parse_notify_optic_bg_noise_end(const QByteArray hexdata, QJsonArray 
     return 0;
 }
 
+int earbud_construc_cmd_force_start_detect(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_START_DETECT, earside);
+    return 0;
+}
 
+int earbud_parse_notify_force_start_detect(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深启动压感检测";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_START_DETECT, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, earbud_get_result_string(hexdata[sizeof(earbud_vbus_notify_header_t)]));
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_force_get_fw_ver(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_FW_VER, earside);
+    return 0;
+}
+
+int earbud_parse_notify_force_get_fw_ver(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深获取压感固件版本号";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_GET_FW_VER, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] );
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_force_get_assemble(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_ASSEMBLE, earside);
+    return 0;
+}
+
+int earbud_parse_notify_force_get_assemble(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深获取压感装配情况";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_GET_ASSEMBLE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    QString v_str;
+    switch (hexdata[sizeof(earbud_vbus_notify_header_t)]) {
+        case 0:
+            v_str = "预压过松";
+            break;
+        case 1:
+            v_str = "预压正常";
+            break;
+        case 2:
+            v_str = "预压过紧";
+            break;
+        default:
+            v_str = "未知";
+            break;
+    }
+    jsobj.insert(topic, v_str);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_force_get_noise_peak(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_NOISE_PEAK, earside);
+    return 0;
+}
+
+int earbud_parse_notify_force_get_noise_peak(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深获取压感噪声峰值";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_GET_NOISE_PEAK, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    uint8_t idx = sizeof(earbud_vbus_notify_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QJsonObject jsobj;
+    jsobj.insert(topic, v);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_force_get_burst_pressure(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_BURST_PRESSURE, earside);
+    return 0;
+}
+
+int earbud_parse_notify_force_get_burst_pressure(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深获取压感按压突发值";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_GET_BURST_PRESSURE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    uint8_t idx = sizeof(earbud_vbus_notify_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QJsonObject jsobj;
+    jsobj.insert(topic, v);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_force_get_semph(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_SEMPH, earside);
+    return 0;
+}
+
+int earbud_parse_notify_force_get_semph(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "钛深获取压感按压信号量";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_FORCE_GET_SEMPH, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    uint8_t idx = sizeof(earbud_vbus_notify_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QJsonObject jsobj;
+    jsobj.insert(topic, v);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
 
 
 

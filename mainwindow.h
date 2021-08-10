@@ -63,6 +63,8 @@ private slots:
 
     void on_optic_test_btn_clicked();
 
+    void on_force_sensor_test_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -102,6 +104,14 @@ protected:
     void optic_bg_noise_start();
     void optic_bg_noise_end();
     void optic_test();
+
+    void force_start_detect();
+    void force_get_fw_ver();
+    void force_get_assemble();
+    void force_get_noise_peak();
+    void force_get_burst_pressure();
+    void force_get_semph();
+    void force_test();
 
 
 private:

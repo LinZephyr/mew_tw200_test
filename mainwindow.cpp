@@ -620,3 +620,76 @@ void MainWindow::on_optic_test_btn_clicked()
     QtConcurrent::run(this, &MainWindow::optic_test);
 }
 
+void MainWindow::force_start_detect()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_start_detect(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_get_fw_ver()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_get_fw_ver(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_get_assemble()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_get_assemble(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_get_noise_peak()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_get_noise_peak(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_get_burst_pressure()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_get_burst_pressure(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_get_semph()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_force_get_semph(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::force_test()
+{
+    force_start_detect();
+
+    QThread::msleep(7000);
+    force_get_fw_ver();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    force_get_assemble();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    force_get_noise_peak();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    force_get_burst_pressure();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    force_get_semph();
+}
+
+void MainWindow::on_force_sensor_test_btn_clicked()
+{
+    QtConcurrent::run(this, &MainWindow::force_test);
+}
+
