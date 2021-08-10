@@ -693,3 +693,9 @@ void MainWindow::on_force_sensor_test_btn_clicked()
     QtConcurrent::run(this, &MainWindow::force_test);
 }
 
+
+void MainWindow::on_charge_cur_btn_clicked()
+{
+
+}
+

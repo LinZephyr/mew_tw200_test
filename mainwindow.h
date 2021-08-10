@@ -65,6 +65,8 @@ private slots:
 
     void on_force_sensor_test_btn_clicked();
 
+    void on_charge_cur_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
