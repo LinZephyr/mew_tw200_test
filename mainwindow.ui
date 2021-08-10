@@ -473,8 +473,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="captouch_test_btn">
        <property name="geometry">
         <rect>
-         <x>240</x>
-         <y>100</y>
+         <x>10</x>
+         <y>150</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -494,7 +494,7 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="optic_test_btn">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>130</x>
          <y>150</y>
          <width>91</width>
          <height>31</height>
@@ -515,7 +515,7 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="force_sensor_test_btn">
        <property name="geometry">
         <rect>
-         <x>130</x>
+         <x>240</x>
          <y>150</y>
          <width>91</width>
          <height>31</height>
