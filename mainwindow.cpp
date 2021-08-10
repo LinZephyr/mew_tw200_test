@@ -12,7 +12,7 @@
 #include <QSerialPortInfo>
 #include <QtConcurrent/QtConcurrent>
 
-#define  TIMER_INTERVAL_SEND_COMMAND  600
+#define  TIMER_INTERVAL_SEND_COMMAND  1000
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -83,7 +83,7 @@ void MainWindow::handleResults(QJsonArray jsarr)
             for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
                 QString k = obj_it.key();
                 QJsonValue v = obj_it.value();
-                if(k.contains(MARK_STR_KEY_EXCEPTION)) {
+                if(k.contains(KEY_STR_EXCEPTION)) {
                     QColor cl = ui->parsedDataBrowser->textColor();
                     ui->parsedDataBrowser->setTextColor(Qt::red);
                     ui->parsedDataBrowser->append(k + " : " + jsonValue2String(v) );
@@ -443,16 +443,77 @@ void MainWindow::on_r_active_license_btn_clicked()
     QtConcurrent::run(this, &MainWindow::active_license_key);
 }
 
-void MainWindow::start_calib_captouch()
+void MainWindow::captouch_start_interrupt()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_calibrate_captouch(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construct_cmd_captouch_start_int(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
 
-void MainWindow::on_start_calib_captouch_btn_clicked()
+void MainWindow::captouch_get_interrupt_result()
 {
-    start_calib_captouch();
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_captouch_get_int_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::captouch_read_version()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_captouch_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::captouch_start_calib()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_captouch_start_calib(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::captouch_get_calib_result()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_captouch_get_calib_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::captouch_read_value()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construct_cmd_captouch_read_value(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::captouch_test()
+{
+    captouch_start_interrupt();
+
+    QThread::msleep(2000);
+    captouch_get_interrupt_result();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    captouch_read_version();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    captouch_start_calib();
+
+    QThread::msleep(3000);
+    captouch_get_calib_result();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    captouch_read_value();
+
+}
+
+void MainWindow::on_captouch_test_btn_clicked()
+{
+    QtConcurrent::run(this, &MainWindow::captouch_test);
 }
 

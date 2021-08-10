@@ -26,8 +26,13 @@
 #define EARBUD_PAYLOAD_LENGTH_SET_LICENSE_KEY 1
 #define EARBUD_PAYLOAD_LENGTH_GET_LICENSE_RESULT 1
 #define EARBUD_PAYLOAD_LENGTH_GET_LICENSE_KEY 1
-#define EARBUD_PAYLOAD_LENGTH_CALIBRATE_CAPTOUCH 1
 
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_START_INT            1
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_GET_INT_RESULT       1
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_READ_VERSION         1
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_START_CALIB          1
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_GET_CALIB_RESULT     1
+#define EARBUD_PAYLOAD_LENGTH_CAPTOUCH_READ_VALUE           11
 
 
 
@@ -38,8 +43,13 @@
 #define EARBUD_CMD_SET_LICENSE_KEY      0x64
 #define EARBUD_CMD_GET_LICENSE_RESULT   0x65
 #define EARBUD_CMD_GET_LICENSE_KEY      0x66
-#define EARBUD_CMD_CALIBRATE_CAPTOUCH   0x81
 
+#define EARBUD_CMD_CAPTOUCH_START_INT           0x85
+#define EARBUD_CMD_CAPTOUCH_GET_INT_RESULT      0x86
+#define EARBUD_CMD_CAPTOUCH_READ_VERSION        0x83
+#define EARBUD_CMD_CAPTOUCH_START_CALIB         0x81
+#define EARBUD_CMD_CAPTOUCH_GET_CALIB_RESULT    0x82
+#define EARBUD_CMD_CAPTOUCH_READ_VALUE          0x84
 
 
 
@@ -52,7 +62,14 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_LICENSE_KEY), earbud_parse_notify_set_license_key},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_RESULT), earbud_parse_notify_get_license_result},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_KEY), earbud_parse_notify_get_license_key},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CALIBRATE_CAPTOUCH), earbud_parse_notify_calibrate_captouch},
+
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_INT), earbud_parse_notify_captouch_start_int},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_INT_RESULT), earbud_parse_notify_captouch_get_int_result},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VERSION), earbud_parse_notify_captouch_read_version},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_CALIB), earbud_parse_notify_captouch_start_calib},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_CALIB_RESULT), earbud_parse_notify_captouch_get_calib_result},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VALUE), earbud_parse_notify_captouch_read_value},
+
 };
 
 int earbud_initialize_parse_func_list(parse_func_map_t &map)
@@ -149,7 +166,7 @@ int earbud_vbus_notify_check_format(const QByteArray &hexdata, uint32_t payload_
     earbud_vbus_notify_header_t *header = (earbud_vbus_notify_header_t *)hexdata.data();
     if(!earbud_vbus_notify_length_field_is_valid(hexdata, payload_len)) {
         jsarr.append(topic);
-        addInfo2Array(jsarr, MARK_STR_KEY_EXCEPTION, "回复数据长度错误！", true);
+        addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
         return RET_FAIL;
     }
 
@@ -294,7 +311,7 @@ int earbud_parse_notify_set_license_key(const QByteArray hexdata, QJsonArray &js
     }
 
     QJsonObject jsobj;
-    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? MARK_STR_VALUE_SUCCESS : MARK_STR_VALUE_FAIL);
+    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? VALUE_STR_SUCCESS : VALUE_STR_FAIL);
     jsarr.append(jsobj);
 
     return 0;
@@ -314,7 +331,7 @@ int earbud_parse_notify_get_license_result(const QByteArray hexdata, QJsonArray 
     }
 
     QJsonObject jsobj;
-    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? MARK_STR_VALUE_SUCCESS : MARK_STR_VALUE_FAIL);
+    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? VALUE_STR_SUCCESS : VALUE_STR_FAIL);
     jsarr.append(jsobj);
 
     return 0;
@@ -334,32 +351,179 @@ int earbud_parse_notify_get_license_key(const QByteArray hexdata, QJsonArray &js
     }
 
     QJsonObject jsobj;
-    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? MARK_STR_VALUE_SUCCESS : MARK_STR_VALUE_FAIL);
+    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? VALUE_STR_SUCCESS : VALUE_STR_FAIL);
     jsarr.append(jsobj);
 
     return 0;
 }
 
-int earbud_construct_cmd_calibrate_captouch(QByteArray &cmd, uint8_t earside)
+
+#define RESULT_OK       0
+#define RESULT_FAIL     1
+#define RESULT_TESTING  3
+QString earbud_get_result_string(uint8_t res)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CALIBRATE_CAPTOUCH, earside);
+    QString str;
+    switch(res) {
+        case RESULT_OK:
+            str = VALUE_STR_SUCCESS;
+            break;
+        case RESULT_FAIL:
+            str = VALUE_STR_FAIL;
+            break;
+        case RESULT_TESTING:
+            str = VALUE_STR_TESTING;
+            break;
+        default:
+            str = "未知";
+            break;
+    }
+
+    return str;
+}
+
+int earbud_construct_cmd_captouch_start_int(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_INT, earside);
     return 0;
 }
 
-int earbud_parse_notify_calibrate_captouch(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_captouch_start_int(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    QString topic = "启动容触校准";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CALIBRATE_CAPTOUCH, topic, jsarr)) {
+    QString topic = "启动容触中断测试";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_START_INT, topic, jsarr)) {
         return RET_FAIL;
     }
 
     QJsonObject jsobj;
-    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] == RET_OK ? MARK_STR_VALUE_SUCCESS : MARK_STR_VALUE_FAIL);
+    jsobj.insert(topic, earbud_get_result_string(hexdata[sizeof(earbud_vbus_notify_header_t)]));
     jsarr.append(jsobj);
 
     return 0;
 }
 
+int earbud_construct_cmd_captouch_get_int_result(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_INT_RESULT, earside);
+    return 0;
+}
+
+int earbud_parse_notify_captouch_get_int_result(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "容触中断测试结果";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_GET_INT_RESULT, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, earbud_get_result_string(hexdata[sizeof(earbud_vbus_notify_header_t)]));
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int earbud_construct_cmd_captouch_read_version(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VERSION, earside);
+    return 0;
+}
+int earbud_parse_notify_captouch_read_version(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "读容触版本";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_READ_VERSION, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, hexdata[sizeof(earbud_vbus_notify_header_t)] );
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int earbud_construct_cmd_captouch_start_calib(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_CALIB, earside);
+    return 0;
+}
+int earbud_parse_notify_captouch_start_calib(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "启动容触校准";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_START_CALIB, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, earbud_get_result_string(hexdata[sizeof(earbud_vbus_notify_header_t)]));
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int earbud_construct_cmd_captouch_get_calib_result(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_CALIB_RESULT, earside);
+    return 0;
+}
+int earbud_parse_notify_captouch_get_calib_result(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "容触校准结果";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_GET_INT_RESULT, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, earbud_get_result_string(hexdata[sizeof(earbud_vbus_notify_header_t)]));
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int earbud_construct_cmd_captouch_read_value(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VALUE, earside);
+    return 0;
+}
+int earbud_parse_notify_captouch_read_value(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "读abov电容值";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_CAPTOUCH_READ_VALUE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    uint8_t idx = sizeof(earbud_vbus_notify_header_t);
+    if(0 != hexdata[idx]) {
+        jsobj.insert(topic, "无效值");
+        jsarr.append(jsobj);
+        return RET_FAIL;
+    }
+
+    jsarr.append(topic);
+    ++idx;
+    uint16_t diff1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    jsobj.insert("按键diff值", diff1);
+
+    idx += 2;
+    uint16_t diff2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    jsobj.insert("入耳diff值", diff2);
+
+    idx += 2;
+    uint16_t cap1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    jsobj.insert("按键容值", cap1);
+
+    idx += 2;
+    uint16_t cap2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    jsobj.insert("入耳容值", cap2);
+
+    idx += 2;
+    uint16_t capref = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    jsobj.insert("参考容值", capref);
+
+    jsarr.append(jsobj);
+
+    return 0;
+}
 
 
 

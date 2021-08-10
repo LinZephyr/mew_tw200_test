@@ -470,7 +470,7 @@ border-width: 1px;</string>
         <string>授权码激活</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="start_calib_captouch_btn">
+      <widget class="QPushButton" name="captouch_test_btn">
        <property name="geometry">
         <rect>
          <x>240</x>
@@ -488,7 +488,7 @@ border-style: solid;
 border-width: 1px;</string>
        </property>
        <property name="text">
-        <string>启动容触校准</string>
+        <string>容触测试</string>
        </property>
       </widget>
      </widget>

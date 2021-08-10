@@ -58,7 +58,7 @@ private slots:
 
     void on_r_active_license_btn_clicked();
 
-    void on_start_calib_captouch_btn_clicked();
+    void on_captouch_test_btn_clicked();
 
 signals:
     void dataReceived(QByteArray hexdata);
@@ -81,7 +81,15 @@ protected:
     void read_temperature();
 
     void active_license_key();
-    void start_calib_captouch();
+
+    void captouch_start_interrupt();
+    void captouch_get_interrupt_result();
+    void captouch_read_version();
+    void captouch_start_calib();
+    void captouch_get_calib_result();
+    void captouch_read_value();
+    void captouch_test();
+
 private:
     Ui::MainWindow *ui;
     QThread comWorkerThread;
