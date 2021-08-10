@@ -11,6 +11,7 @@
 #include <QListView>
 #include <QSerialPortInfo>
 #include <QtConcurrent/QtConcurrent>
+#include <QTextCursor>
 
 #define  TIMER_INTERVAL_SEND_COMMAND  1000
 
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     initCom();
     startThread();
     setRelatedWidgetsStatus(false);
+    qRegisterMetaType<QTextCursor>("QTextCursor");
 #ifdef DUMP_THREAD_ID
     qDebug() << "MainWindow::" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
 #endif
@@ -83,14 +85,15 @@ void MainWindow::handleResults(QJsonArray jsarr)
             for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
                 QString k = obj_it.key();
                 QJsonValue v = obj_it.value();
-                if(k.contains(KEY_STR_EXCEPTION)) {
+                QString v_str = jsonValue2String(v);
+                if(k.contains(KEY_STR_EXCEPTION) || v_str.contains(VALUE_STR_FAIL)) {
                     QColor cl = ui->parsedDataBrowser->textColor();
                     ui->parsedDataBrowser->setTextColor(Qt::red);
-                    ui->parsedDataBrowser->append(k + " : " + jsonValue2String(v) );
+                    ui->parsedDataBrowser->append(k + " : " +  v_str);
                     ui->parsedDataBrowser->setTextColor(cl);
                 }
                 else {
-                    ui->parsedDataBrowser->append(k + " : " + jsonValue2String(v) );
+                    ui->parsedDataBrowser->append(k + " : " + v_str );
                 }
             }
         }
@@ -522,5 +525,98 @@ void MainWindow::on_captouch_test_btn_clicked()
 }
 
 
+void MainWindow::optic_communicate()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_communicate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
 
+void MainWindow::optic_int_start()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_int_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_int_end()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_int_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_laser_start()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_laser_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_laser_end()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_laser_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_full_scale()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_full_scale(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_bg_noise_start()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_bg_noise_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_bg_noise_end()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_bg_noise_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::optic_test()
+{
+    optic_communicate();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_int_start();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_int_end();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_laser_start();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_laser_end();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_full_scale();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_bg_noise_start();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    optic_bg_noise_end();
+}
+
+void MainWindow::on_optic_test_btn_clicked()
+{
+    QtConcurrent::run(this, &MainWindow::optic_test);
+}
 

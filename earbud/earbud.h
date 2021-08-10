@@ -53,6 +53,28 @@ int earbud_parse_notify_captouch_get_calib_result(const QByteArray hexdata, QJso
 int earbud_construct_cmd_captouch_read_value(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_captouch_read_value(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_optic_communicate(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_communicate(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_optic_int_start(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_int_start(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_int_end(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_int_end(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_laser_start(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_laser_start(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_laser_end(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_laser_end(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_full_scale(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_full_scale(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_bg_noise_start(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_bg_noise_start(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_optic_bg_noise_end(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_optic_bg_noise_end(const QByteArray hexdata, QJsonArray &jsarr);
 
 #endif // EARBUD_H

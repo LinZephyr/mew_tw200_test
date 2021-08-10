@@ -61,6 +61,8 @@ private slots:
 
     void on_captouch_test_btn_clicked();
 
+    void on_optic_test_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -90,6 +92,17 @@ protected:
     void captouch_get_calib_result();
     void captouch_read_value();
     void captouch_test();
+
+    void optic_communicate();
+    void optic_int_start();
+    void optic_int_end();
+    void optic_laser_start();
+    void optic_laser_end();
+    void optic_full_scale();
+    void optic_bg_noise_start();
+    void optic_bg_noise_end();
+    void optic_test();
+
 
 private:
     Ui::MainWindow *ui;
