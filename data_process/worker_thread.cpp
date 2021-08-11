@@ -50,6 +50,9 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
     else if(is_notify_from_earbud_chgbox_com_mode(hexdata)) {
         key = earbud_chgbox_com_mode_get_notify_key(hexdata);
     }
+    else if(is_rsp_from_earbud(hexdata)) {
+        key = earbud_get_rsp_key(hexdata);
+    }
 
     if(key.isEmpty()) {
         return;

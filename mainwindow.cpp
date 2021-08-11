@@ -744,11 +744,34 @@ void MainWindow::on_work_cur_btn_clicked()
     QtConcurrent::run(this, &MainWindow::get_work_cur);
 }
 
+void MainWindow::set_vbus_baud_rate()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
 
+void MainWindow::enter_standby()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_standby(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::get_standby_cur()
+{
+    chgbox_enter_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
+    set_vbus_baud_rate();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
+    enter_standby();
+}
 
 void MainWindow::on_sleep_cur_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::get_standby_cur);
 }
 
 void MainWindow::on_power_off_cur_btn_clicked()

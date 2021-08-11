@@ -130,6 +130,10 @@ protected:
     void chgbox_exit_com_mode();
     void get_work_cur();
 
+    void set_vbus_baud_rate();
+    void enter_standby();
+    void get_standby_cur();
+
 
 private:
     Ui::MainWindow *ui;

@@ -4,12 +4,6 @@
 
 #include <QDebug>
 
-/*
- *    耳机1-wire通信区分左右. 1-WIRE通信的前提: 盒子退出通信模式.
- *    耳机RACE通信不区分左右. RACE通信的前提: 盒子进入通信模式, 再设置耳机RACE波特率.
- *    盒子开机后默认进入通信模式.
- */
-
 #define EARBUD_LEAD1 0xFE
 #define EARBUD_LEAD2 0xFC
 
@@ -57,7 +51,9 @@
 #define EARBUD_PAYLOAD_LENGTH_FORCE_GET_SEMPH           2
 
 #define EARBUD_PAYLOAD_LENGTH_ENTER_AGE_MODE    1
-
+#define EARBUD_PAYLOAD_LENGTH_SET_VBUS_BAUD_RATE    0
+//#define EARBUD_PAYLOAD_LENGTH_ENTER_STANDBY  0
+#define EARBUD_PAYLOAD_LENGTH_POWER_OFF  1
 
 #define EARBUD_CMD_READ_MAC             0x2E
 #define EARBUD_CMD_READ_VERSION         0x23
@@ -91,6 +87,9 @@
 #define EARBUD_CMD_FORCE_GET_SEMPH              0X8C
 
 #define EARBUD_CMD_ENTER_AGE_MODE       0x24
+#define EARBUD_CMD_SET_VBUS_BAUD_RATE   0x0F
+#define EARBUD_CMD_ENTER_STANDBY    0x18
+#define EARBUD_CMD_POWER_OFF    0
 
 QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
@@ -128,6 +127,9 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_ENTER_AGE_MODE), earbud_parse_notify_enter_age_mode },
     {"FE0F00", earbud_parse_notify_chgbox_exit_com_mode },
     {"FE0F01", earbud_parse_notify_chgbox_enter_com_mode },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_VBUS_BAUD_RATE), earbud_parse_notify_set_vbus_baud_rate },
+    {"011100", earbud_parse_notify_enter_standby },
+    {"270000", earbud_parse_notify_power_off },
 
 };
 
@@ -168,6 +170,7 @@ typedef struct {
     uint8_t race_earside;
 } earbud_vbus_cmd_header_t;
 typedef earbud_vbus_cmd_header_t earbud_vbus_notify_header_t;
+typedef earbud_vbus_notify_header_t earbud_vbus_rsp_header_t;
 
 uint32_t calc_length_little_end(uint32_t len1, uint32_t len2)
 {
@@ -238,6 +241,27 @@ QString earbud_get_notify_key(const QByteArray &hexdata)
     QString key;
     earbud_vbus_notify_header_t *notify = (earbud_vbus_notify_header_t *)hexdata.data();
     key.sprintf("%02X%02X%02X", (uint8_t)notify->race_id1, (uint8_t)notify->race_id2, (uint8_t)notify->race_cmd);
+    return key;
+}
+
+bool is_rsp_from_earbud(const QByteArray &hexdata)
+{
+    earbud_vbus_rsp_header_t *header = (earbud_vbus_rsp_header_t *)hexdata.data();
+    unsigned int hex_bytes = (unsigned int)hexdata.count();
+    if(hex_bytes >= sizeof(earbud_vbus_rsp_header_t) - 1
+            && header->race_type == RACE_TYPE_RSP
+        ) {
+        return true;
+    }
+
+    return false;
+}
+
+QString earbud_get_rsp_key(const QByteArray &hexdata)
+{
+    QString key;
+    earbud_vbus_rsp_header_t *rsp = (earbud_vbus_rsp_header_t *)hexdata.data();
+    key.sprintf("%02X%02X%02X", (uint8_t)rsp->race_id1, (uint8_t)rsp->race_id2, (uint8_t)rsp->race_cmd);
     return key;
 }
 
@@ -1004,6 +1028,76 @@ QString earbud_chgbox_com_mode_get_notify_key(const QByteArray &hexdata)
     return key;
 }
 
+int earbud_construc_cmd_set_vbus_baud_rate(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd_header(cmd, 0, 9, 5, 0, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_VBUS_BAUD_RATE, earside);
 
+    // "0x05" means 9600 baud rate of vbus.
+    cmd.append(0x05);
+    return RET_OK;
+}
+
+int earbud_parse_notify_set_vbus_baud_rate(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "设置通信波特率";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_SET_VBUS_BAUD_RATE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, VALUE_STR_SUCCESS);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_enter_standby(QByteArray &cmd, uint8_t earside)
+{
+    earside = 0;
+    earbud_construct_cmd_header(cmd, 0, 8, 4, 0, 0X01, 0X11, EARBUD_CMD_ENTER_STANDBY, earside);
+    return RET_OK;
+}
+
+#define EARBUD_CMD_LENGTH_ENTER_STANDBY  11
+int earbud_parse_notify_enter_standby(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    Q_UNUSED(jsarr);
+
+    QString topic = "进入待机";
+    if(hexdata.count() < EARBUD_CMD_LENGTH_ENTER_STANDBY) {
+        jsarr.append(topic);
+        addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, VALUE_STR_SUCCESS);
+    jsarr.append(jsobj);
+    return RET_OK;
+}
+
+int earbud_construc_cmd_power_off(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 07 05 5A 03 00 27 00 01";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_notify_power_off(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "关机";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_POWER_OFF, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, VALUE_STR_SUCCESS);
+    jsarr.append(jsobj);
+    return RET_OK;
+}
 
 
