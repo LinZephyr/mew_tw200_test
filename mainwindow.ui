@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1267</width>
+    <width>1379</width>
     <height>744</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>1241</width>
+      <width>1361</width>
       <height>521</height>
      </rect>
     </property>
@@ -37,7 +37,7 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>361</width>
+       <width>481</width>
        <height>501</height>
       </rect>
      </property>
@@ -328,7 +328,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>90</y>
+         <y>170</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -390,7 +390,7 @@ font: 10pt &quot;黑体&quot;;</string>
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>90</y>
+         <y>170</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -410,8 +410,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="r_channel_btn">
        <property name="geometry">
         <rect>
-         <x>240</x>
-         <y>90</y>
+         <x>250</x>
+         <y>170</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -431,8 +431,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="r_ntc_btn">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>140</y>
+         <x>370</x>
+         <y>170</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -452,8 +452,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="r_active_license_btn">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>140</y>
+         <x>10</x>
+         <y>270</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -474,7 +474,7 @@ border-width: 1px;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>190</y>
+         <y>320</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -495,7 +495,7 @@ border-width: 1px;</string>
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>190</y>
+         <y>320</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -515,8 +515,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="force_sensor_test_btn">
        <property name="geometry">
         <rect>
-         <x>240</x>
-         <y>190</y>
+         <x>250</x>
+         <y>320</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -537,7 +537,7 @@ border-width: 1px;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>240</y>
+         <y>370</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -558,7 +558,7 @@ border-width: 1px;</string>
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>240</y>
+         <y>370</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -578,8 +578,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="sleep_cur_btn">
        <property name="geometry">
         <rect>
-         <x>240</x>
-         <y>240</y>
+         <x>250</x>
+         <y>370</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -599,8 +599,8 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="power_off_cur_btn">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>290</y>
+         <x>370</x>
+         <y>370</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -622,7 +622,7 @@ border-width: 1px;</string>
         <rect>
          <x>10</x>
          <y>40</y>
-         <width>131</width>
+         <width>91</width>
          <height>31</height>
         </rect>
        </property>
@@ -635,15 +635,15 @@ border-style: solid;
 border-width: 1px;</string>
        </property>
        <property name="text">
-        <string>盒子进入通信模式</string>
+        <string>盒子进入通信</string>
        </property>
       </widget>
       <widget class="QPushButton" name="chgbox_exit_com_mode_2">
        <property name="geometry">
         <rect>
-         <x>180</x>
+         <x>130</x>
          <y>40</y>
-         <width>131</width>
+         <width>91</width>
          <height>31</height>
         </rect>
        </property>
@@ -656,7 +656,112 @@ border-style: solid;
 border-width: 1px;</string>
        </property>
        <property name="text">
-        <string>盒子退出通信模式</string>
+        <string>盒子退出通信</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="eb_enter_dut_btn">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>进入DUT</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="eb_exit_dut_btn">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>90</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>退出DUT</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="eb_restart_btn">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>90</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>重启</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="gsensor_btn">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>320</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>G-Sensor</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="bat_data_btn">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>220</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 170, 127);
+border-color: rgb(170, 0, 0);
+font: 10pt &quot;黑体&quot;;
+border-style: solid;
+border-width: 1px;</string>
+       </property>
+       <property name="text">
+        <string>读电量</string>
        </property>
       </widget>
      </widget>
@@ -669,7 +774,7 @@ border-width: 1px;</string>
     <widget class="QGroupBox" name="resultGBox">
      <property name="geometry">
       <rect>
-       <x>800</x>
+       <x>950</x>
        <y>10</y>
        <width>391</width>
        <height>501</height>
@@ -721,9 +826,9 @@ border-width: 1px;</string>
     <widget class="QFrame" name="frame_6">
      <property name="geometry">
       <rect>
-       <x>380</x>
+       <x>500</x>
        <y>10</y>
-       <width>391</width>
+       <width>441</width>
        <height>501</height>
       </rect>
      </property>
@@ -738,7 +843,7 @@ border-width: 1px;</string>
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>381</width>
+        <width>421</width>
         <height>81</height>
        </rect>
       </property>
@@ -785,9 +890,9 @@ border-width: 1px;</string>
       <widget class="QPushButton" name="clearUpBtn">
        <property name="geometry">
         <rect>
-         <x>230</x>
+         <x>220</x>
          <y>10</y>
-         <width>91</width>
+         <width>71</width>
          <height>23</height>
         </rect>
        </property>
@@ -853,7 +958,7 @@ border-style: solid;</string>
       <widget class="QLabel" name="send_lbl_3">
        <property name="geometry">
         <rect>
-         <x>100</x>
+         <x>110</x>
          <y>50</y>
          <width>54</width>
          <height>21</height>
@@ -882,7 +987,7 @@ border-width:1px;</string>
        <rect>
         <x>10</x>
         <y>100</y>
-        <width>371</width>
+        <width>421</width>
         <height>391</height>
        </rect>
       </property>
@@ -1348,7 +1453,7 @@ border-width:1px;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1267</width>
+     <width>1379</width>
      <height>21</height>
     </rect>
    </property>

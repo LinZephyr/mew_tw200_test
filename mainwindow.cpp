@@ -800,10 +800,24 @@ void MainWindow::on_power_off_cur_btn_clicked()
     QtConcurrent::run(this, &MainWindow::get_power_off_cur);
 }
 
+void MainWindow::on_eb_enter_dut_btn_clicked()
+{
+
+}
+
+void MainWindow::on_eb_exit_dut_btn_clicked()
+{
+
+}
 
 
+void MainWindow::on_eb_restart_btn_clicked()
+{
 
+}
 
+void MainWindow::on_bat_data_btn_clicked()
+{
 
-
+}
 

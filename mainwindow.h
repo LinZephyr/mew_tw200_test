@@ -77,6 +77,14 @@ private slots:
 
     void on_chgbox_exit_com_mode_2_clicked();
 
+    void on_eb_enter_dut_btn_clicked();
+
+    void on_eb_exit_dut_btn_clicked();
+
+    void on_eb_restart_btn_clicked();
+
+    void on_bat_data_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
