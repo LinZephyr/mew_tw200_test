@@ -714,6 +714,24 @@ void MainWindow::chgbox_enter_com_mode()
     }
 }
 
+void MainWindow::on_chgbox_enter_com_mode_clicked()
+{
+    chgbox_enter_com_mode();
+}
+
+void MainWindow::chgbox_exit_com_mode()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_chgbox_exit_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::on_chgbox_exit_com_mode_2_clicked()
+{
+    chgbox_exit_com_mode();
+}
+
 void MainWindow::get_work_cur()
 {
     enter_age_mode();
@@ -737,6 +755,9 @@ void MainWindow::on_power_off_cur_btn_clicked()
 {
 
 }
+
+
+
 
 
 

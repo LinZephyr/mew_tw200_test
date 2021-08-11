@@ -73,6 +73,10 @@ private slots:
 
     void on_power_off_cur_btn_clicked();
 
+    void on_chgbox_enter_com_mode_clicked();
+
+    void on_chgbox_exit_com_mode_2_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -123,6 +127,7 @@ protected:
 
     void enter_age_mode();
     void chgbox_enter_com_mode();
+    void chgbox_exit_com_mode();
     void get_work_cur();
 
 
