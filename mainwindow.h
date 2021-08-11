@@ -67,6 +67,12 @@ private slots:
 
     void on_charge_cur_btn_clicked();
 
+    void on_work_cur_btn_clicked();
+
+    void on_sleep_cur_btn_clicked();
+
+    void on_power_off_cur_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 

@@ -693,6 +693,11 @@ void MainWindow::on_force_sensor_test_btn_clicked()
     QtConcurrent::run(this, &MainWindow::force_test);
 }
 
+void MainWindow::on_charge_cur_btn_clicked()
+{
+
+}
+
 void MainWindow::enter_age_mode()
 {
     QByteArray cmd;
@@ -716,8 +721,24 @@ void MainWindow::get_work_cur()
     chgbox_enter_com_mode();
 }
 
-void MainWindow::on_charge_cur_btn_clicked()
+void MainWindow::on_work_cur_btn_clicked()
 {
     QtConcurrent::run(this, &MainWindow::get_work_cur);
 }
+
+
+
+void MainWindow::on_sleep_cur_btn_clicked()
+{
+
+}
+
+void MainWindow::on_power_off_cur_btn_clicked()
+{
+
+}
+
+
+
+
 
