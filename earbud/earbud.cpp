@@ -4,6 +4,12 @@
 
 #include <QDebug>
 
+/*
+ *    耳机1-wire通信区分左右. 1-WIRE通信的前提: 盒子退出通信模式.
+ *    耳机RACE通信不区分左右. RACE通信的前提: 盒子进入通信模式, 再设置耳机RACE波特率.
+ *    盒子开机后默认进入通信模式.
+ */
+
 #define EARBUD_LEAD1 0xFE
 #define EARBUD_LEAD2 0xFC
 
@@ -235,7 +241,7 @@ QString earbud_get_notify_key(const QByteArray &hexdata)
     return key;
 }
 
-void earbud_construct_cmd(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uint8_t rlen1, uint8_t rlen2, uint8_t race_id1, uint8_t race_id2, uint8_t cmd, uint8_t earside)
+void earbud_construct_cmd_header(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uint8_t rlen1, uint8_t rlen2, uint8_t race_id1, uint8_t race_id2, uint8_t cmd, uint8_t earside)
 {
     earbud_vbus_cmd_header_t header;
 
@@ -253,12 +259,12 @@ void earbud_construct_cmd(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uin
     header.race_earside = earside;
 
     cmd_arr.append((const char*)&header, sizeof(header));
-    assert(earbud_vbus_cmd_length_field_is_valid(cmd_arr, 0));
+    //assert(earbud_vbus_cmd_length_field_is_valid(cmd_arr, 0));
 }
 
 int earbud_construct_cmd_read_mac(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_MAC, earside);
     return 0;
 }
 
@@ -284,7 +290,7 @@ int earbud_parse_notify_read_mac(const QByteArray hexdata, QJsonArray &jsarr)
 
 int earbud_construct_cmd_read_version(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_VERSION, earside);
     return 0;
 }
 
@@ -309,7 +315,7 @@ int earbud_parse_notify_read_version(const QByteArray hexdata, QJsonArray &jsarr
 
 int earbud_construct_cmd_read_channel(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_CHANNEL, earside);
     return 0;
 }
 
@@ -330,7 +336,7 @@ int earbud_parse_notify_read_channel(const QByteArray hexdata, QJsonArray &jsarr
 
 int earbud_construct_cmd_read_temperature(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_TEMPERATURE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_TEMPERATURE, earside);
     return 0;
 }
 
@@ -352,7 +358,7 @@ int earbud_parse_notify_read_temperature(const QByteArray hexdata, QJsonArray &j
 
 int earbud_construct_cmd_set_license_key(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_LICENSE_KEY, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_LICENSE_KEY, earside);
     return 0;
 }
 
@@ -372,7 +378,7 @@ int earbud_parse_notify_set_license_key(const QByteArray hexdata, QJsonArray &js
 
 int earbud_construct_cmd_get_license_result(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_RESULT, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_RESULT, earside);
     return 0;
 }
 
@@ -392,7 +398,7 @@ int earbud_parse_notify_get_license_result(const QByteArray hexdata, QJsonArray 
 
 int earbud_construct_cmd_get_license_key(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_KEY, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_GET_LICENSE_KEY, earside);
     return 0;
 }
 
@@ -437,7 +443,7 @@ QString earbud_get_result_string(uint8_t res)
 
 int earbud_construct_cmd_captouch_start_int(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_INT, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_INT, earside);
     return 0;
 }
 
@@ -457,7 +463,7 @@ int earbud_parse_notify_captouch_start_int(const QByteArray hexdata, QJsonArray 
 
 int earbud_construct_cmd_captouch_get_int_result(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_INT_RESULT, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_INT_RESULT, earside);
     return 0;
 }
 
@@ -477,7 +483,7 @@ int earbud_parse_notify_captouch_get_int_result(const QByteArray hexdata, QJsonA
 
 int earbud_construct_cmd_captouch_read_version(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VERSION, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VERSION, earside);
     return 0;
 }
 int earbud_parse_notify_captouch_read_version(const QByteArray hexdata, QJsonArray &jsarr)
@@ -496,7 +502,7 @@ int earbud_parse_notify_captouch_read_version(const QByteArray hexdata, QJsonArr
 
 int earbud_construct_cmd_captouch_start_calib(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_CALIB, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_START_CALIB, earside);
     return 0;
 }
 int earbud_parse_notify_captouch_start_calib(const QByteArray hexdata, QJsonArray &jsarr)
@@ -515,7 +521,7 @@ int earbud_parse_notify_captouch_start_calib(const QByteArray hexdata, QJsonArra
 
 int earbud_construct_cmd_captouch_get_calib_result(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_CALIB_RESULT, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_GET_CALIB_RESULT, earside);
     return 0;
 }
 int earbud_parse_notify_captouch_get_calib_result(const QByteArray hexdata, QJsonArray &jsarr)
@@ -534,7 +540,7 @@ int earbud_parse_notify_captouch_get_calib_result(const QByteArray hexdata, QJso
 
 int earbud_construct_cmd_captouch_read_value(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VALUE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_CAPTOUCH_READ_VALUE, earside);
     return 0;
 }
 int earbud_parse_notify_captouch_read_value(const QByteArray hexdata, QJsonArray &jsarr)
@@ -580,7 +586,7 @@ int earbud_parse_notify_captouch_read_value(const QByteArray hexdata, QJsonArray
 
 int earbud_construc_cmd_optic_communicate(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_COMMUNICATION, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_COMMUNICATION, earside);
     return 0;
 }
 
@@ -600,7 +606,7 @@ int earbud_parse_notify_optic_communicate(const QByteArray hexdata, QJsonArray &
 
 int earbud_construc_cmd_optic_int_start(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_INT_START, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_INT_START, earside);
     return 0;
 }
 
@@ -620,7 +626,7 @@ int earbud_parse_notify_optic_int_start(const QByteArray hexdata, QJsonArray &js
 
 int earbud_construc_cmd_optic_int_end(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_INT_END, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_INT_END, earside);
     return 0;
 }
 
@@ -640,7 +646,7 @@ int earbud_parse_notify_optic_int_end(const QByteArray hexdata, QJsonArray &jsar
 
 int earbud_construc_cmd_optic_laser_start(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_START, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_START, earside);
     return 0;
 }
 
@@ -660,7 +666,7 @@ int earbud_parse_notify_optic_laser_start(const QByteArray hexdata, QJsonArray &
 
 int earbud_construc_cmd_optic_laser_end(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_END, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_END, earside);
     return 0;
 }
 
@@ -686,7 +692,7 @@ int earbud_parse_notify_optic_laser_end(const QByteArray hexdata, QJsonArray &js
 
 int earbud_construc_cmd_optic_full_scale(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE, earside);
     return 0;
 }
 
@@ -712,7 +718,7 @@ int earbud_parse_notify_optic_full_scale(const QByteArray hexdata, QJsonArray &j
 
 int earbud_construc_cmd_optic_bg_noise_start(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_START, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_START, earside);
     return 0;
 }
 
@@ -732,7 +738,7 @@ int earbud_parse_notify_optic_bg_noise_start(const QByteArray hexdata, QJsonArra
 
 int earbud_construc_cmd_optic_bg_noise_end(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_END, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_END, earside);
     return 0;
 }
 
@@ -758,7 +764,7 @@ int earbud_parse_notify_optic_bg_noise_end(const QByteArray hexdata, QJsonArray 
 
 int earbud_construc_cmd_force_start_detect(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_START_DETECT, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_START_DETECT, earside);
     return 0;
 }
 
@@ -778,7 +784,7 @@ int earbud_parse_notify_force_start_detect(const QByteArray hexdata, QJsonArray 
 
 int earbud_construc_cmd_force_get_fw_ver(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_FW_VER, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_FW_VER, earside);
     return 0;
 }
 
@@ -798,7 +804,7 @@ int earbud_parse_notify_force_get_fw_ver(const QByteArray hexdata, QJsonArray &j
 
 int earbud_construc_cmd_force_get_assemble(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_ASSEMBLE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_ASSEMBLE, earside);
     return 0;
 }
 
@@ -833,7 +839,7 @@ int earbud_parse_notify_force_get_assemble(const QByteArray hexdata, QJsonArray 
 
 int earbud_construc_cmd_force_get_noise_peak(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_NOISE_PEAK, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_NOISE_PEAK, earside);
     return 0;
 }
 
@@ -855,7 +861,7 @@ int earbud_parse_notify_force_get_noise_peak(const QByteArray hexdata, QJsonArra
 
 int earbud_construc_cmd_force_get_burst_pressure(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_BURST_PRESSURE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_BURST_PRESSURE, earside);
     return 0;
 }
 
@@ -877,7 +883,7 @@ int earbud_parse_notify_force_get_burst_pressure(const QByteArray hexdata, QJson
 
 int earbud_construc_cmd_force_get_semph(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_SEMPH, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_SEMPH, earside);
     return 0;
 }
 
@@ -899,7 +905,8 @@ int earbud_parse_notify_force_get_semph(const QByteArray hexdata, QJsonArray &js
 
 int earbud_construc_cmd_enter_age_mode(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_ENTER_AGE_MODE, earside);
+    earbud_construct_cmd_header(cmd, 0, 9, 0, 5, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_ENTER_AGE_MODE, earside);
+    cmd.append(0x01);
     return RET_OK;
 }
 
