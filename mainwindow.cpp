@@ -762,6 +762,8 @@ void MainWindow::enter_standby()
 
 void MainWindow::get_standby_cur()
 {
+    chgbox_exit_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
     chgbox_enter_com_mode();
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
     set_vbus_baud_rate();
@@ -774,9 +776,28 @@ void MainWindow::on_sleep_cur_btn_clicked()
     QtConcurrent::run(this, &MainWindow::get_standby_cur);
 }
 
+void MainWindow::earbud_power_off()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::get_power_off_cur()
+{
+    chgbox_exit_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
+    chgbox_enter_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
+    set_vbus_baud_rate();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
+    earbud_power_off();
+}
+
 void MainWindow::on_power_off_cur_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::get_power_off_cur);
 }
 
 

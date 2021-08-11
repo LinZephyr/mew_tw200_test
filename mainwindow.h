@@ -134,6 +134,9 @@ protected:
     void enter_standby();
     void get_standby_cur();
 
+    void earbud_power_off();
+    void get_power_off_cur();
+
 
 private:
     Ui::MainWindow *ui;
