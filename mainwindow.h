@@ -85,6 +85,8 @@ private slots:
 
     void on_bat_data_btn_clicked();
 
+    void on_gsensor_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 

@@ -821,3 +821,8 @@ void MainWindow::on_bat_data_btn_clicked()
 
 }
 
+void MainWindow::on_gsensor_btn_clicked()
+{
+
+}
+
