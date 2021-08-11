@@ -115,6 +115,10 @@ protected:
     void force_get_semph();
     void force_test();
 
+    void enter_age_mode();
+    void chgbox_enter_com_mode();
+    void get_work_cur();
+
 
 private:
     Ui::MainWindow *ui;

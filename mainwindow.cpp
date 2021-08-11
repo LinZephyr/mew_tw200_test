@@ -693,9 +693,31 @@ void MainWindow::on_force_sensor_test_btn_clicked()
     QtConcurrent::run(this, &MainWindow::force_test);
 }
 
+void MainWindow::enter_age_mode()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::chgbox_enter_com_mode()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_chgbox_enter_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::get_work_cur()
+{
+    enter_age_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    chgbox_enter_com_mode();
+}
 
 void MainWindow::on_charge_cur_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::get_work_cur);
 }
 

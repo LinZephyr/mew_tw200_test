@@ -14,6 +14,9 @@ int earbud_initialize_parse_func_list(parse_func_map_t &map);
 bool is_notify_from_earbud(const QByteArray &hexdata);
 QString earbud_get_notify_key(const QByteArray &hexdata);
 
+bool is_notify_from_earbud_chgbox_com_mode(const QByteArray &hexdata);
+QString earbud_chgbox_com_mode_get_notify_key(const QByteArray &hexdata);
+
 int earbud_construct_cmd_read_mac(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_read_mac(const QByteArray hexdata, QJsonArray &jsarr);
 
@@ -95,7 +98,13 @@ int earbud_parse_notify_force_get_burst_pressure(const QByteArray hexdata, QJson
 int earbud_construc_cmd_force_get_semph(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_force_get_semph(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_enter_age_mode(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_enter_age_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_chgbox_enter_com_mode(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_chgbox_enter_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_chgbox_exit_com_mode(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_chgbox_exit_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
 #endif // EARBUD_H
