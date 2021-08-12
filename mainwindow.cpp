@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     initCom();
     startThread();
     setRelatedWidgetsStatus(false);
+    ui->hexRecvRadioBtn->setChecked(true);
     qRegisterMetaType<QTextCursor>("QTextCursor");
 #ifdef DUMP_THREAD_ID
     qDebug() << "MainWindow::" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
