@@ -55,6 +55,13 @@
 //#define EARBUD_PAYLOAD_LENGTH_ENTER_STANDBY  0
 #define EARBUD_PAYLOAD_LENGTH_POWER_OFF  0
 
+//#define EARBUD_PAYLOAD_LENGTH_RESTART   -1
+//#define EARBUD_PAYLOAD_LENGTH_ENTER_DUT -1
+//#define EARBUD_PAYLOAD_LENGTH_EXIT_DUT  -1
+#define EARBUD_PAYLOAD_LENGTH_READ_GSENSOR  6
+#define EARBUD_PAYLOAD_LENGTH_READ_BAT_POWER 1
+
+
 #define EARBUD_CMD_READ_MAC             0x2E
 #define EARBUD_CMD_READ_VERSION         0x23
 #define EARBUD_CMD_READ_CHANNEL         0x69
@@ -89,7 +96,9 @@
 #define EARBUD_CMD_ENTER_AGE_MODE       0x24
 #define EARBUD_CMD_SET_VBUS_BAUD_RATE   0x0F
 #define EARBUD_CMD_ENTER_STANDBY    0x18
-#define EARBUD_CMD_POWER_OFF    0
+#define EARBUD_CMD_RESTART          0x19
+#define EARBUD_CMD_READ_BAT_POWER   0X06
+
 
 QString earbud_make_key(uint8_t usr_id1, uint8_t usr_id2, uint8_t cmd);
 static parse_func_list_t earbud_parse_func_list = {
@@ -125,11 +134,16 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_FORCE_GET_SEMPH), earbud_parse_notify_force_get_semph },
 
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_ENTER_AGE_MODE), earbud_parse_notify_enter_age_mode },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_VBUS_BAUD_RATE), earbud_parse_notify_set_vbus_baud_rate },
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_BAT_POWER), earbud_parse_notify_read_bat_power },
+
     {"FE0F00", earbud_parse_notify_chgbox_exit_com_mode },
     {"FE0F01", earbud_parse_notify_chgbox_enter_com_mode },
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_VBUS_BAUD_RATE), earbud_parse_notify_set_vbus_baud_rate },
-    {"011100", earbud_parse_notify_enter_standby },
-    {"270000", earbud_parse_notify_power_off },
+
+    {"0111", earbud_parse_rsp_standby_or_restart },
+    {"2700", earbud_parse_rsp_power_off },
+    {"010A", earbud_parse_rsp_enter_exit_dut },
+    {"0100", earbud_parse_rsp_read_gsensor },
 
 };
 
@@ -260,9 +274,32 @@ bool is_rsp_from_earbud(const QByteArray &hexdata)
 QString earbud_get_rsp_key(const QByteArray &hexdata)
 {
     QString key;
-    earbud_vbus_rsp_header_t *rsp = (earbud_vbus_rsp_header_t *)hexdata.data();
-    key.sprintf("%02X%02X%02X", (uint8_t)rsp->race_id1, (uint8_t)rsp->race_id2, (uint8_t)rsp->race_cmd);
+    if(10 <= hexdata.count() ) {
+        key.sprintf("%02X%02X", (uint8_t)hexdata[8], (uint8_t)hexdata[9]);
+    }
+
     return key;
+}
+
+#define EARBUD_CMD_LENGTH_DUT  11
+
+bool is_dut_rsp_from_earbud(const QByteArray &hexdata)
+{
+    QString dut_str = "FE FC 00 07 05 5B 03 00 01 0A";
+    if(hexdata.count() >= EARBUD_CMD_LENGTH_DUT) {
+        QString data_str = hexArray2StringPlusSpace(hexdata);
+        if(data_str.startsWith(dut_str)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+QString earbud_get_dut_rsp_key(const QByteArray &hexdata)
+{
+    Q_UNUSED(hexdata);
+    return "010A";
 }
 
 void earbud_construct_cmd_header(QByteArray &cmd_arr, uint8_t vlen1, uint8_t vlen2, uint8_t rlen1, uint8_t rlen2, uint8_t race_id1, uint8_t race_id2, uint8_t cmd, uint8_t earside)
@@ -977,7 +1014,7 @@ int earbud_parse_notify_chgbox_enter_com_mode(const QByteArray hexdata, QJsonArr
     return RET_OK;
 }
 
-#define EARBUD_CMD_LENGTH_CHGBOX_EXIT_COM_MODE    9
+//#define EARBUD_CMD_LENGTH_CHGBOX_EXIT_COM_MODE    9
 #define EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE    9
 
 int earbud_construc_cmd_chgbox_exit_com_mode(QByteArray &cmd, uint8_t earside)
@@ -1009,10 +1046,7 @@ int earbud_parse_notify_chgbox_exit_com_mode(const QByteArray hexdata, QJsonArra
 
 bool is_notify_from_earbud_chgbox_com_mode(const QByteArray &hexdata)
 {
-    if(EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE > hexdata.count() ) {
-        return false;
-    }
-    if(0xFE == (uint8_t)hexdata[0] && 0x0F == (uint8_t)hexdata[1]) {
+    if( EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE <= hexdata.count() && 0xFE == (uint8_t)hexdata[0] && 0x0F == (uint8_t)hexdata[1] ) {
         return true;
     }
     return false;
@@ -1058,13 +1092,19 @@ int earbud_construc_cmd_enter_standby(QByteArray &cmd, uint8_t earside)
     return RET_OK;
 }
 
-#define EARBUD_CMD_LENGTH_ENTER_STANDBY  11
-int earbud_parse_notify_enter_standby(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_construc_cmd_restart(QByteArray &cmd, uint8_t earside)
 {
-    Q_UNUSED(jsarr);
+    earside = 0;
+    earbud_construct_cmd_header(cmd, 0, 8, 4, 0, 0X01, 0X11, EARBUD_CMD_RESTART, earside);
+    return RET_OK;
+}
 
-    QString topic = "进入待机";
-    if(hexdata.count() < EARBUD_CMD_LENGTH_ENTER_STANDBY) {
+
+#define EARBUD_CMD_LENGTH_STANDBY_OR_RESTART  11
+int earbud_parse_rsp_standby_or_restart(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "待机/重启";
+    if(hexdata.count() < EARBUD_CMD_LENGTH_STANDBY_OR_RESTART) {
         jsarr.append(topic);
         addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
         return RET_FAIL;
@@ -1087,7 +1127,7 @@ int earbud_construc_cmd_power_off(QByteArray &cmd, uint8_t earside)
     return RET_OK;
 }
 
-int earbud_parse_notify_power_off(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_rsp_power_off(const QByteArray hexdata, QJsonArray &jsarr)
 {
     QString topic = "关机";
     if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_POWER_OFF, topic, jsarr)) {
@@ -1100,4 +1140,105 @@ int earbud_parse_notify_power_off(const QByteArray hexdata, QJsonArray &jsarr)
     return RET_OK;
 }
 
+int earbud_construc_cmd_enter_dut(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 09 05 5A 05 00 01 0A E3 F2 01";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_exit_dut(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 09 05 5A 05 00 01 0A E3 F2 00";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_rsp_enter_exit_dut(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "进入/退出DUT";
+    if(hexdata.count() < EARBUD_CMD_LENGTH_DUT) {
+        jsarr.append(topic);
+        addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, hexdata[EARBUD_CMD_LENGTH_DUT - 1] == 0? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+    jsarr.append(jsobj);
+    return RET_OK;
+}
+
+int earbud_construc_cmd_read_gsensor(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 06 05 5A 02 00 01 00";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+#define EARBUD_RSP_LENGTH_READ_GSENSOR  18
+int earbud_parse_rsp_read_gsensor(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "读G-Sensor数据";
+    if(hexdata.count() < EARBUD_RSP_LENGTH_READ_GSENSOR) {
+        jsarr.append(topic);
+        addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+
+    uint8_t idx = 10;
+    jsobj.insert("I2C通信", 0 == (uint8_t)hexdata[idx] && 0 == (uint8_t)hexdata[idx + 1] ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+
+    idx += 2;
+    //int16_t v = (int16_t) ((uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8);
+    //int16_t v =  (hexdata[idx] | hexdata[idx + 1] << 8);
+
+
+    jsobj.insert("X轴", (float)(((int16_t) ((uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8)) / 4 ) * 0.244 );
+
+    idx += 2;
+    jsobj.insert("Y轴", (float)(((int16_t) ((uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8)) / 4 ) * 0.244 );
+
+    idx += 2;
+    jsobj.insert("Z轴", (float)(((int16_t) ((uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8)) / 4 ) * 0.244 );
+
+    jsarr.append(jsobj);
+    return RET_OK;
+}
+
+int earbud_construc_cmd_read_bat_power(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd_header(cmd, 0, 9, 0, 5, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_BAT_POWER, earside);
+    cmd.append(0x64);
+    return RET_OK;
+}
+int earbud_parse_notify_read_bat_power(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "电量";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_READ_BAT_POWER, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    uint8_t idx = sizeof(earbud_vbus_notify_header_t);
+    QString v;
+    v.sprintf("%%%02d", (uint8_t)hexdata[idx]);
+    QJsonObject jsobj;
+    jsobj.insert(topic, v);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
 

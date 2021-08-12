@@ -87,6 +87,10 @@ private slots:
 
     void on_gsensor_btn_clicked();
 
+    void on_eb_standby_btn_clicked();
+
+    void on_eb_poweroff_btn_clicked();
+
 signals:
     void dataReceived(QByteArray hexdata);
 
@@ -102,51 +106,64 @@ protected:
     void setRelatedWidgetsStatus(bool opened);
     void setComWidgetsStatus(bool opened);
 
-    void read_mac_addr();
-    void read_fw_ver_addr();
-    void read_channel();
-    void read_temperature();
+    void cmd_read_mac_addr();
+    void cmd_read_fw_ver_addr();
+    void cmd_read_channel();
+    void cmd_read_temperature();
+    void cmd_active_license_key();
 
-    void active_license_key();
+    void cmd_captouch_start_interrupt();
+    void cmd_captouch_get_interrupt_result();
+    void cmd_captouch_read_version();
+    void cmd_captouch_start_calib();
+    void cmd_captouch_get_calib_result();
+    void cmd_captouch_read_value();
+    void cmd_list_captouch();
 
-    void captouch_start_interrupt();
-    void captouch_get_interrupt_result();
-    void captouch_read_version();
-    void captouch_start_calib();
-    void captouch_get_calib_result();
-    void captouch_read_value();
-    void captouch_test();
+    void cmd_optic_communicate();
+    void cmd_optic_int_start();
+    void cmd_optic_int_end();
+    void cmd_optic_laser_start();
+    void cmd_optic_laser_end();
+    void cmd_optic_full_scale();
+    void cmd_optic_bg_noise_start();
+    void cmd_optic_bg_noise_end();
+    void cmd_list_optic();
 
-    void optic_communicate();
-    void optic_int_start();
-    void optic_int_end();
-    void optic_laser_start();
-    void optic_laser_end();
-    void optic_full_scale();
-    void optic_bg_noise_start();
-    void optic_bg_noise_end();
-    void optic_test();
+    void cmd_force_start_detect();
+    void cmd_force_get_fw_ver();
+    void cmd_force_get_assemble();
+    void cmd_force_get_noise_peak();
+    void cmd_force_get_burst_pressure();
+    void cmd_force_get_semph();
+    void cmd_list_force();
 
-    void force_start_detect();
-    void force_get_fw_ver();
-    void force_get_assemble();
-    void force_get_noise_peak();
-    void force_get_burst_pressure();
-    void force_get_semph();
-    void force_test();
+    void cmd_enter_age_mode();
+    void cmd_chgbox_enter_com_mode();
+    void cmd_chgbox_exit_com_mode();
+    void cmd_set_vbus_baud_rate();
+    void cmd_list_chbox_enter_com_mode();
+    void cmd_list_get_work_cur();
 
-    void enter_age_mode();
-    void chgbox_enter_com_mode();
-    void chgbox_exit_com_mode();
-    void get_work_cur();
+    void cmd_enter_standby();
+    void cmd_list_enter_standby();
 
-    void set_vbus_baud_rate();
-    void enter_standby();
-    void get_standby_cur();
+    void cmd_earbud_power_off();
+    void cmd_list_power_off();
 
-    void earbud_power_off();
-    void get_power_off_cur();
+    void cmd_earbud_restart();
+    void cmd_list_earbud_restart();
 
+    void cmd_earbud_enter_dut();
+    void cmd_list_earbud_enter_dut();
+
+    void cmd_earbud_exit_dut();
+    void cmd_list_earbud_exit_dut();
+
+    void cmd_read_gsensor();
+    void cmd_list_read_gsensor();
+
+    void cmd_read_bat_power();
 
 private:
     Ui::MainWindow *ui;

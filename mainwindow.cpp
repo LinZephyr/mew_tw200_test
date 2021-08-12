@@ -74,6 +74,8 @@ void MainWindow::handleResults(QJsonArray jsarr)
             ...
         ]
     */
+    static QMutex mutex;
+    QMutexLocker locker(&mutex);
     ui->parsedDataBrowser->append("");
     for(QJsonArray::const_iterator it = jsarr.constBegin(); it != jsarr.constEnd(); ++it) {
         if(it->type() == QJsonValue::String) {
@@ -87,10 +89,10 @@ void MainWindow::handleResults(QJsonArray jsarr)
                 QJsonValue v = obj_it.value();
                 QString v_str = jsonValue2String(v);
                 if(k.contains(KEY_STR_EXCEPTION) || v_str.contains(VALUE_STR_FAIL)) {
-                    QColor cl = ui->parsedDataBrowser->textColor();
+                    //QColor cl = ui->parsedDataBrowser->textColor();
                     ui->parsedDataBrowser->setTextColor(Qt::red);
                     ui->parsedDataBrowser->append(k + " : " +  v_str);
-                    ui->parsedDataBrowser->setTextColor(cl);
+                    //ui->parsedDataBrowser->setTextColor(cl);
                 }
                 else {
                     ui->parsedDataBrowser->append(k + " : " + v_str );
@@ -98,6 +100,8 @@ void MainWindow::handleResults(QJsonArray jsarr)
             }
         }
     }
+    ui->parsedDataBrowser->moveCursor(QTextCursor::End);
+    ui->parsedDataBrowser->setTextColor(Qt::black);
 }
 
 void MainWindow::checkComPort()
@@ -297,6 +301,8 @@ void MainWindow::recv_com_data()
         return;
     }
 
+    //static QMutex mutex;
+    //QMutexLocker locker(&mutex);
     //ui->textBrowser->setTextColor(Qt::black);
     if(ui->hexRecvRadioBtn->isChecked()){
         asciidata = hexArray2StringPlusSpace(hexdata);
@@ -310,6 +316,7 @@ void MainWindow::recv_com_data()
     QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
     QString content = "<span style=\" color:blue;\">" + timeStrLine + tmpstr + asciidata + "\n\r" + "</span>";
     ui->rawDataBrowser->append(content);
+    ui->rawDataBrowser->moveCursor(QTextCursor::End);
     emit dataReceived(hexdata);
 }
 
@@ -369,10 +376,10 @@ void MainWindow::on_chbox_r_sn_btn_clicked()
 
 void MainWindow::on_r_mac_btn_clicked()
 {
-    read_mac_addr();
+    cmd_read_mac_addr();
 }
 
-void MainWindow::read_mac_addr()
+void MainWindow::cmd_read_mac_addr()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_read_mac(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -380,7 +387,7 @@ void MainWindow::read_mac_addr()
     }
 }
 
-void MainWindow::read_fw_ver_addr()
+void MainWindow::cmd_read_fw_ver_addr()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -390,10 +397,10 @@ void MainWindow::read_fw_ver_addr()
 
 void MainWindow::on_r_fw_ver_btn_clicked()
 {
-    read_fw_ver_addr();
+    cmd_read_fw_ver_addr();
 }
 
-void MainWindow::read_channel()
+void MainWindow::cmd_read_channel()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_read_channel(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -403,10 +410,10 @@ void MainWindow::read_channel()
 
 void MainWindow::on_r_channel_btn_clicked()
 {
-    read_channel();
+    cmd_read_channel();
 }
 
-void MainWindow::read_temperature()
+void MainWindow::cmd_read_temperature()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_read_temperature(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -416,10 +423,10 @@ void MainWindow::read_temperature()
 
 void MainWindow::on_r_ntc_btn_clicked()
 {
-    read_temperature();
+    cmd_read_temperature();
 }
 
-void MainWindow::active_license_key()
+void MainWindow::cmd_active_license_key()
 {
 #ifdef DUMP_THREAD_ID
     qDebug() << "MainWindow:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
@@ -447,10 +454,10 @@ void MainWindow::on_r_active_license_btn_clicked()
 #ifdef DUMP_THREAD_ID
     qDebug() << "MainWindow:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
 #endif
-    QtConcurrent::run(this, &MainWindow::active_license_key);
+    QtConcurrent::run(this, &MainWindow::cmd_active_license_key);
 }
 
-void MainWindow::captouch_start_interrupt()
+void MainWindow::cmd_captouch_start_interrupt()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_start_int(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -458,7 +465,7 @@ void MainWindow::captouch_start_interrupt()
     }
 }
 
-void MainWindow::captouch_get_interrupt_result()
+void MainWindow::cmd_captouch_get_interrupt_result()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_get_int_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -466,7 +473,7 @@ void MainWindow::captouch_get_interrupt_result()
     }
 }
 
-void MainWindow::captouch_read_version()
+void MainWindow::cmd_captouch_read_version()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -474,7 +481,7 @@ void MainWindow::captouch_read_version()
     }
 }
 
-void MainWindow::captouch_start_calib()
+void MainWindow::cmd_captouch_start_calib()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_start_calib(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -482,7 +489,7 @@ void MainWindow::captouch_start_calib()
     }
 }
 
-void MainWindow::captouch_get_calib_result()
+void MainWindow::cmd_captouch_get_calib_result()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_get_calib_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -490,7 +497,7 @@ void MainWindow::captouch_get_calib_result()
     }
 }
 
-void MainWindow::captouch_read_value()
+void MainWindow::cmd_captouch_read_value()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_captouch_read_value(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -498,34 +505,34 @@ void MainWindow::captouch_read_value()
     }
 }
 
-void MainWindow::captouch_test()
+void MainWindow::cmd_list_captouch()
 {
-    captouch_start_interrupt();
+    cmd_captouch_start_interrupt();
 
     QThread::msleep(2000);
-    captouch_get_interrupt_result();
+    cmd_captouch_get_interrupt_result();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    captouch_read_version();
+    cmd_captouch_read_version();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    captouch_start_calib();
+    cmd_captouch_start_calib();
 
     QThread::msleep(3000);
-    captouch_get_calib_result();
+    cmd_captouch_get_calib_result();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    captouch_read_value();
+    cmd_captouch_read_value();
 
 }
 
 void MainWindow::on_captouch_test_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::captouch_test);
+    QtConcurrent::run(this, &MainWindow::cmd_list_captouch);
 }
 
 
-void MainWindow::optic_communicate()
+void MainWindow::cmd_optic_communicate()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_communicate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -533,7 +540,7 @@ void MainWindow::optic_communicate()
     }
 }
 
-void MainWindow::optic_int_start()
+void MainWindow::cmd_optic_int_start()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_int_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -541,7 +548,7 @@ void MainWindow::optic_int_start()
     }
 }
 
-void MainWindow::optic_int_end()
+void MainWindow::cmd_optic_int_end()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_int_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -549,7 +556,7 @@ void MainWindow::optic_int_end()
     }
 }
 
-void MainWindow::optic_laser_start()
+void MainWindow::cmd_optic_laser_start()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_laser_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -557,7 +564,7 @@ void MainWindow::optic_laser_start()
     }
 }
 
-void MainWindow::optic_laser_end()
+void MainWindow::cmd_optic_laser_end()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_laser_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -565,7 +572,7 @@ void MainWindow::optic_laser_end()
     }
 }
 
-void MainWindow::optic_full_scale()
+void MainWindow::cmd_optic_full_scale()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_full_scale(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -573,7 +580,7 @@ void MainWindow::optic_full_scale()
     }
 }
 
-void MainWindow::optic_bg_noise_start()
+void MainWindow::cmd_optic_bg_noise_start()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_bg_noise_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -581,7 +588,7 @@ void MainWindow::optic_bg_noise_start()
     }
 }
 
-void MainWindow::optic_bg_noise_end()
+void MainWindow::cmd_optic_bg_noise_end()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_optic_bg_noise_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -589,38 +596,38 @@ void MainWindow::optic_bg_noise_end()
     }
 }
 
-void MainWindow::optic_test()
+void MainWindow::cmd_list_optic()
 {
-    optic_communicate();
+    cmd_optic_communicate();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_int_start();
+    cmd_optic_int_start();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_int_end();
+    cmd_optic_int_end();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_laser_start();
+    cmd_optic_laser_start();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_laser_end();
+    cmd_optic_laser_end();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_full_scale();
+    cmd_optic_full_scale();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_bg_noise_start();
+    cmd_optic_bg_noise_start();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    optic_bg_noise_end();
+    cmd_optic_bg_noise_end();
 }
 
 void MainWindow::on_optic_test_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::optic_test);
+    QtConcurrent::run(this, &MainWindow::cmd_list_optic);
 }
 
-void MainWindow::force_start_detect()
+void MainWindow::cmd_force_start_detect()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_start_detect(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -628,7 +635,7 @@ void MainWindow::force_start_detect()
     }
 }
 
-void MainWindow::force_get_fw_ver()
+void MainWindow::cmd_force_get_fw_ver()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_get_fw_ver(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -636,7 +643,7 @@ void MainWindow::force_get_fw_ver()
     }
 }
 
-void MainWindow::force_get_assemble()
+void MainWindow::cmd_force_get_assemble()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_get_assemble(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -644,7 +651,7 @@ void MainWindow::force_get_assemble()
     }
 }
 
-void MainWindow::force_get_noise_peak()
+void MainWindow::cmd_force_get_noise_peak()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_get_noise_peak(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -652,7 +659,7 @@ void MainWindow::force_get_noise_peak()
     }
 }
 
-void MainWindow::force_get_burst_pressure()
+void MainWindow::cmd_force_get_burst_pressure()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_get_burst_pressure(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -660,7 +667,7 @@ void MainWindow::force_get_burst_pressure()
     }
 }
 
-void MainWindow::force_get_semph()
+void MainWindow::cmd_force_get_semph()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_force_get_semph(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -668,29 +675,29 @@ void MainWindow::force_get_semph()
     }
 }
 
-void MainWindow::force_test()
+void MainWindow::cmd_list_force()
 {
-    force_start_detect();
+    cmd_force_start_detect();
 
     QThread::msleep(7000);
-    force_get_fw_ver();
+    cmd_force_get_fw_ver();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    force_get_assemble();
+    cmd_force_get_assemble();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    force_get_noise_peak();
+    cmd_force_get_noise_peak();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    force_get_burst_pressure();
+    cmd_force_get_burst_pressure();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    force_get_semph();
+    cmd_force_get_semph();
 }
 
 void MainWindow::on_force_sensor_test_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::force_test);
+    QtConcurrent::run(this, &MainWindow::cmd_list_force);
 }
 
 void MainWindow::on_charge_cur_btn_clicked()
@@ -698,7 +705,7 @@ void MainWindow::on_charge_cur_btn_clicked()
 
 }
 
-void MainWindow::enter_age_mode()
+void MainWindow::cmd_enter_age_mode()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -706,7 +713,7 @@ void MainWindow::enter_age_mode()
     }
 }
 
-void MainWindow::chgbox_enter_com_mode()
+void MainWindow::cmd_chgbox_enter_com_mode()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_chgbox_enter_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -716,10 +723,10 @@ void MainWindow::chgbox_enter_com_mode()
 
 void MainWindow::on_chgbox_enter_com_mode_clicked()
 {
-    chgbox_enter_com_mode();
+    QtConcurrent::run(this, &MainWindow::cmd_list_chbox_enter_com_mode);
 }
 
-void MainWindow::chgbox_exit_com_mode()
+void MainWindow::cmd_chgbox_exit_com_mode()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_chgbox_exit_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -727,24 +734,34 @@ void MainWindow::chgbox_exit_com_mode()
     }
 }
 
-void MainWindow::on_chgbox_exit_com_mode_2_clicked()
+void MainWindow::cmd_list_chbox_enter_com_mode()
 {
-    chgbox_exit_com_mode();
+    cmd_chgbox_exit_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    cmd_chgbox_enter_com_mode();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    cmd_set_vbus_baud_rate();
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
 }
 
-void MainWindow::get_work_cur()
+void MainWindow::on_chgbox_exit_com_mode_2_clicked()
 {
-    enter_age_mode();
+    cmd_chgbox_exit_com_mode();
+}
+
+void MainWindow::cmd_list_get_work_cur()
+{
+    cmd_enter_age_mode();
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    chgbox_enter_com_mode();
+    cmd_list_chbox_enter_com_mode();
 }
 
 void MainWindow::on_work_cur_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::get_work_cur);
+    QtConcurrent::run(this, &MainWindow::cmd_list_get_work_cur);
 }
 
-void MainWindow::set_vbus_baud_rate()
+void MainWindow::cmd_set_vbus_baud_rate()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -752,7 +769,7 @@ void MainWindow::set_vbus_baud_rate()
     }
 }
 
-void MainWindow::enter_standby()
+void MainWindow::cmd_enter_standby()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_enter_standby(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -760,23 +777,18 @@ void MainWindow::enter_standby()
     }
 }
 
-void MainWindow::get_standby_cur()
+void MainWindow::cmd_list_enter_standby()
 {
-    chgbox_exit_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    chgbox_enter_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    set_vbus_baud_rate();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    enter_standby();
+    cmd_list_chbox_enter_com_mode();
+    cmd_enter_standby();
 }
 
 void MainWindow::on_sleep_cur_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::get_standby_cur);
+    QtConcurrent::run(this, &MainWindow::cmd_list_enter_standby);
 }
 
-void MainWindow::earbud_power_off()
+void MainWindow::cmd_earbud_power_off()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construc_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -784,45 +796,131 @@ void MainWindow::earbud_power_off()
     }
 }
 
-void MainWindow::get_power_off_cur()
+void MainWindow::cmd_list_power_off()
 {
-    chgbox_exit_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    chgbox_enter_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    set_vbus_baud_rate();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND );
-    earbud_power_off();
+    cmd_list_chbox_enter_com_mode();
+    cmd_earbud_power_off();
+}
+
+void MainWindow::cmd_earbud_restart()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_restart(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_list_earbud_restart()
+{
+    cmd_list_chbox_enter_com_mode();
+
+
+    // 因为耳机重启指令的回复数据和待机命令一样,所以直接在这里显示"重启"提示信息.
+    //QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    //QJsonArray jsarr;
+    //jsarr.append("耳机将重启...");
+    //handleResults(jsarr);
+    cmd_earbud_restart();
+}
+
+void MainWindow::cmd_earbud_enter_dut()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_list_earbud_enter_dut()
+{
+    cmd_list_chbox_enter_com_mode();
+
+    // 因为耳机进入/退出DUT的回复数据和待机命令一样,所以直接在这里显示提示信息.
+    //QJsonArray jsarr;
+    //jsarr.append("进入DUT");
+    //handleResults(jsarr);
+    cmd_earbud_enter_dut();
+}
+
+void MainWindow::cmd_earbud_exit_dut()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_list_earbud_exit_dut()
+{
+    cmd_list_chbox_enter_com_mode();
+
+    // 因为耳机进入/退出DUT的回复数据和待机命令一样,所以直接在这里显示提示信息.
+    //QJsonArray jsarr;
+    //jsarr.append("退出DUT");
+    //handleResults(jsarr);
+    cmd_earbud_exit_dut();
+}
+
+void MainWindow::cmd_read_gsensor()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_read_gsensor(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_list_read_gsensor()
+{
+    cmd_list_chbox_enter_com_mode();
+    cmd_read_gsensor();
+}
+
+void MainWindow::cmd_read_bat_power()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_read_bat_power(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
 }
 
 void MainWindow::on_power_off_cur_btn_clicked()
 {
-    QtConcurrent::run(this, &MainWindow::get_power_off_cur);
+    QtConcurrent::run(this, &MainWindow::cmd_list_power_off);
 }
 
 void MainWindow::on_eb_enter_dut_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_enter_dut);
 }
 
 void MainWindow::on_eb_exit_dut_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_exit_dut);
 }
-
 
 void MainWindow::on_eb_restart_btn_clicked()
 {
-
+    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_restart);
 }
 
 void MainWindow::on_bat_data_btn_clicked()
 {
-
+    cmd_read_bat_power();
 }
 
 void MainWindow::on_gsensor_btn_clicked()
 {
+    QtConcurrent::run(this, &MainWindow::cmd_list_read_gsensor);
+}
 
+
+void MainWindow::on_eb_standby_btn_clicked()
+{
+    QtConcurrent::run(this, &MainWindow::cmd_list_enter_standby);
+}
+
+void MainWindow::on_eb_poweroff_btn_clicked()
+{
+    QtConcurrent::run(this, &MainWindow::cmd_list_power_off);
 }
 

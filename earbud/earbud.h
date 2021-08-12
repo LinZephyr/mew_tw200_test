@@ -23,6 +23,9 @@ QString earbud_get_notify_key(const QByteArray &hexdata);
 bool is_rsp_from_earbud(const QByteArray &hexdata);
 QString earbud_get_rsp_key(const QByteArray &hexdata);
 
+bool is_dut_rsp_from_earbud(const QByteArray &hexdata);
+QString earbud_get_dut_rsp_key(const QByteArray &hexdata);
+
 bool is_notify_from_earbud_chgbox_com_mode(const QByteArray &hexdata);
 QString earbud_chgbox_com_mode_get_notify_key(const QByteArray &hexdata);
 
@@ -120,12 +123,21 @@ int earbud_construc_cmd_set_vbus_baud_rate(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_set_vbus_baud_rate(const QByteArray hexdata, QJsonArray &jsarr);
 
 int earbud_construc_cmd_enter_standby(QByteArray &cmd, uint8_t earside);
-int earbud_parse_notify_enter_standby(const QByteArray hexdata, QJsonArray &jsarr);
+int earbud_construc_cmd_restart(QByteArray &cmd, uint8_t earside);
+int earbud_parse_rsp_standby_or_restart(const QByteArray hexdata, QJsonArray &jsarr);
 
 int earbud_construc_cmd_power_off(QByteArray &cmd, uint8_t earside);
-int earbud_parse_notify_power_off(const QByteArray hexdata, QJsonArray &jsarr);
+int earbud_parse_rsp_power_off(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_enter_dut(QByteArray &cmd, uint8_t earside);
+int earbud_construc_cmd_exit_dut(QByteArray &cmd, uint8_t earside);
+int earbud_parse_rsp_enter_exit_dut(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_read_gsensor(QByteArray &cmd, uint8_t earside);
+int earbud_parse_rsp_read_gsensor(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_read_bat_power(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_read_bat_power(const QByteArray hexdata, QJsonArray &jsarr);
 
 
 
