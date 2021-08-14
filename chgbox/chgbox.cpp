@@ -248,7 +248,7 @@ typedef struct {
 
 int construct_chgbox_ft_w_sn_cmd(const QString snStr, QByteArray &hexcmd)
 {
-    if((CHGBOX_FT_SN_LEN - 1) > snStr.length()) {
+    if(CHGBOX_FT_SN_LEN  > snStr.length()) {
         qWarning() << "充电仓厂测SN命令长度不够！";
         return RET_FAIL;
     }
@@ -257,10 +257,10 @@ int construct_chgbox_ft_w_sn_cmd(const QString snStr, QByteArray &hexcmd)
     hexcmd.append(CHGBOX_FT_CMD_LEAD);
     hexcmd.append(CHGBOX_FT_W_SN_CMD_FC);
     hexcmd.append(BAT_BRAND_DEFAULT);
-    for(int i = 0; i < CHGBOX_FT_SN_LEN - 1; ++i) {
+    for(int i = 0; i < CHGBOX_FT_SN_LEN; ++i) {
         QChar ch = snStr[i];
         if(ch.isNumber() || ch.isLetter()) {
-            hexcmd.append(ch.toLatin1() - '0');
+            hexcmd.append((uint8_t)ch.toLatin1());
         }
         else {
             QString warn;
@@ -332,8 +332,10 @@ int chgbox_ft_get_sn(const QByteArray &hexdata, QJsonArray &jsarr, bool rw_flag)
     addInfo2Array(jsarr, k, v, false);
 
     k = "SN";
-    QByteArray tmparr(hexdata.data() + 2, CHGBOX_FT_SN_LEN);
-    v = hexArray2StringPlusSpace(tmparr);
+    v.clear();
+    for(int i = 0; i < CHGBOX_FT_SN_LEN; ++i) {
+        v.append(hexdata[3 + i]);
+    }
     addInfo2Array(jsarr, k, v, false);
 
     return RET_OK;
@@ -370,7 +372,7 @@ int parse_chgbox_ft_r_sn_rsp(const QByteArray hexdata, QJsonArray &jsarr)
         return RET_FAIL;
     }
 
-    return chgbox_ft_get_sn(hexdata, jsarr, CHGBOX_SN_FLAG_W);
+    return chgbox_ft_get_sn(hexdata, jsarr, CHGBOX_SN_FLAG_R);
 }
 
 

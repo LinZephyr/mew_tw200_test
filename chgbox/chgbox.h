@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QJsonObject>
 
-#define CHGBOX_FT_SN_LEN  10
+#define CHGBOX_FT_SN_LEN  9
 
 bool is_rsp_from_chgbox(const QByteArray &hexdata);
 QString chgbox_get_rsp_key(const QByteArray &hexrsp);
