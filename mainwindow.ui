@@ -224,7 +224,7 @@
                 <enum>QFrame::NoFrame</enum>
                </property>
                <property name="text">
-                <string>请输入10个字符SN码:</string>
+                <string>请输入9个字符SN码:</string>
                </property>
               </widget>
              </item>
@@ -567,7 +567,7 @@ border-width: 1px;</string>
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
