@@ -39,7 +39,8 @@
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_INT_END             1
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_LASER_START         1
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_LASER_END           2
-#define EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE          2
+#define EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE_START        1
+#define EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE_END          2
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_BG_NOISE_START      1
 #define EARBUD_PAYLOAD_LENGTH_OPTIC_BG_NOISE_END        2
 
@@ -82,9 +83,10 @@
 #define EARBUD_CMD_OPTIC_INT_END                0X8F
 #define EARBUD_CMD_OPTIC_LASER_START            0X90
 #define EARBUD_CMD_OPTIC_LASER_END              0X91
-#define EARBUD_CMD_OPTIC_FULL_SCALE             0X92
-#define EARBUD_CMD_OPTIC_BG_NOISE_START         0X93
-#define EARBUD_CMD_OPTIC_BG_NOISE_END           0X94
+#define EARBUD_CMD_OPTIC_FULL_SCALE_START           0X92
+#define EARBUD_CMD_OPTIC_FULL_SCALE_END             0X93
+#define EARBUD_CMD_OPTIC_BG_NOISE_START         0X94
+#define EARBUD_CMD_OPTIC_BG_NOISE_END           0X95
 
 #define EARBUD_CMD_FORCE_START_DETECT           0X87
 #define EARBUD_CMD_FORCE_GET_FW_VER             0X88
@@ -122,7 +124,8 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_INT_END), earbud_parse_notify_optic_int_end},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_START), earbud_parse_notify_optic_laser_start},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_LASER_END), earbud_parse_notify_optic_laser_end},
-    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE), earbud_parse_notify_optic_full_scale},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE_START), earbud_parse_notify_optic_full_scale_start},
+    {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE_END), earbud_parse_notify_optic_full_scale_end},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_START), earbud_parse_notify_optic_bg_noise_start},
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_BG_NOISE_END), earbud_parse_notify_optic_bg_noise_end},
 
@@ -751,16 +754,36 @@ int earbud_parse_notify_optic_laser_end(const QByteArray hexdata, QJsonArray &js
     return 0;
 }
 
-int earbud_construc_cmd_optic_full_scale(QByteArray &cmd, uint8_t earside)
+int earbud_construc_cmd_optic_full_scale_start(QByteArray &cmd, uint8_t earside)
 {
-    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE, earside);
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE_START, earside);
     return 0;
 }
 
-int earbud_parse_notify_optic_full_scale(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_optic_full_scale_start(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    QString topic = "光感满量程测试";
-    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE, topic, jsarr)) {
+    QString topic = "光感满量程测试开始";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE_START, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, (uint8_t)hexdata[sizeof(earbud_vbus_notify_header_t)] == 0x00 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL);
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_optic_full_scale_end(QByteArray &cmd, uint8_t earside)
+{
+    earbud_construct_cmd_header(cmd, 0, 8, 0, 4, RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_OPTIC_FULL_SCALE_END, earside);
+    return 0;
+}
+
+int earbud_parse_notify_optic_full_scale_end(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "光感满量程测试结束";
+    if(RET_FAIL == earbud_vbus_notify_check_format(hexdata, EARBUD_PAYLOAD_LENGTH_OPTIC_FULL_SCALE_END, topic, jsarr)) {
         return RET_FAIL;
     }
 

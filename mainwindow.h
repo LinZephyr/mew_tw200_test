@@ -125,7 +125,8 @@ protected:
     void cmd_optic_int_end();
     void cmd_optic_laser_start();
     void cmd_optic_laser_end();
-    void cmd_optic_full_scale();
+    void cmd_optic_full_scale_start();
+    void cmd_optic_full_scale_end();
     void cmd_optic_bg_noise_start();
     void cmd_optic_bg_noise_end();
     void cmd_list_optic();

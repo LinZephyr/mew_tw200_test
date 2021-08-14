@@ -347,6 +347,8 @@ void MainWindow::on_chgbox_basic_FT_btn_clicked()
 void MainWindow::on_chgbox_wSN_btn_clicked()
 {
     QString snStr = ui->chgbox_SN_edit->text();
+    ui->chgbox_SN_edit->clear();
+    ui->chgbox_SN_edit->setFocus();
 
     //如果发送数据为空，给出提示并返回
     if(snStr.isEmpty()){
@@ -573,10 +575,18 @@ void MainWindow::cmd_optic_laser_end()
     }
 }
 
-void MainWindow::cmd_optic_full_scale()
+void MainWindow::cmd_optic_full_scale_start()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_full_scale(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construc_cmd_optic_full_scale_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_optic_full_scale_end()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_optic_full_scale_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -614,7 +624,10 @@ void MainWindow::cmd_list_optic()
     cmd_optic_laser_end();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_optic_full_scale();
+    cmd_optic_full_scale_start();
+
+    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    cmd_optic_full_scale_end();
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
     cmd_optic_bg_noise_start();
