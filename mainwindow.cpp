@@ -93,8 +93,8 @@ int MainWindow::initialize_cmd_func_map(cmd_func_map_t &map, const cmd_func_list
 
 void MainWindow::init_table_widget(QTableWidget *tbl, const cmd_func_list_t func_list, int col_cnt)
 {
-    tbl->setWindowTitle(tr("1-Wire指令"));
-    tbl->setWindowFlags(Qt::WindowTitleHint);
+    //tbl->setWindowTitle(tr("1-Wire指令"));
+    //tbl->setWindowFlags(Qt::WindowTitleHint);
     tbl->setFrameShape(QFrame::NoFrame);
 
     tbl->horizontalHeader()->setVisible(false);
@@ -111,11 +111,17 @@ void MainWindow::init_table_widget(QTableWidget *tbl, const cmd_func_list_t func
     }
     tbl->setRowCount(row_cnt);
     tbl->setColumnCount(col_cnt);
+    //tbl->setBackgroundRole(QPalette::Base);
 
     int i = 0;
     for(cmd_func_list_t::const_iterator it = func_list.begin(); it != func_list.end(); ++it) {
         QTableWidgetItem *newItem = new QTableWidgetItem(it->first);
         newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        newItem->setBackgroundColor(Qt::black);
+        QFont font = newItem->font();
+        font.setBold(true);
+        newItem->setFont(font);
+        newItem->setTextColor(Qt::white);
         tbl->setItem(i / tbl->columnCount(), i % tbl->columnCount(), newItem);
         ++i;
     }
@@ -140,7 +146,7 @@ void MainWindow::init_1wire_tbl()
         { CMD_ONEWIRE_FORCE_SENSOR, std::bind(&MainWindow::cmd_list_force, this) },
     };
     init_table_widget(ui->onewire_tbl, cmd_onewire_func_list, 4);
-    ui->onewire_tbl->item(0, 0)->setBackground(Qt::green);
+    ui->onewire_tbl->item(0, 0)->setBackgroundColor(Qt::darkGreen);
 }
 
 void MainWindow::init_race_tbl()
@@ -161,8 +167,8 @@ void MainWindow::init_race_tbl()
         { CMD_RACE_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
     };
     init_table_widget(ui->race_tbl, cmd_race_func_list, 4);
-    ui->race_tbl->item(0, 0)->setBackground(Qt::green);
-    ui->race_tbl->item(0, 1)->setBackground(Qt::green);
+    ui->race_tbl->item(0, 0)->setBackgroundColor(Qt::darkGreen);
+    ui->race_tbl->item(0, 1)->setBackgroundColor(Qt::darkGreen);
 }
 
 void MainWindow::checkComPort()
