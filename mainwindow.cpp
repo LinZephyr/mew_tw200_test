@@ -15,12 +15,39 @@
 
 #define  TIMER_INTERVAL_SEND_COMMAND  1000
 
+#define CMD_ENTER_1WIRE_COM_MODE    "开始1-Wire通信"
+#define CMD_ONEWIRE_R_MAC    "读MAC地址"
+#define CMD_ONEWIRE_R_VER    "读耳机版本"
+#define CMD_ONEWIRE_R_CHANNEL     "读声道"
+#define CMD_ONEWIRE_R_NTC    "读NTC温度"
+#define CMD_ONEWIRE_R_BAT_POWER    "读电量"
+#define CMD_ONEWIRE_ACTIV_LIC       "授权码激活"
+#define CMD_ONEWIRE_CAPTOUCH_SENSOR     "容触测试"
+#define CMD_ONEWIRE_OPTIC_SENSOR    "光感测试"
+#define CMD_ONEWIRE_FORCE_SENSOR    "压感测试"
+
+#define CMD_ENTER_RACE_COM_MODE  "开始RACE通信"
+#define CMD_SET_RACE_BAUTE_RATE "设置RACE波特率"
+#define CMD_RACE_ENTER_DUT  "进入DUT"
+#define CMD_RACE_EXIT_DUT   "退出DUT"
+#define CMD_RACE_POWEROFF   "关机"
+#define CMD_RACE_STANDBY    "待机"
+#define CMD_RACE_RESTART    "重启"
+#define CMD_RACE_R_CHG_CUR  "读充电电流"
+#define CMD_RACE_R_WORK_CUR "读工作电流"
+#define CMD_RACE_R_BG_CUR   "读底电流"
+#define CMD_RACE_R_POFF_CUR "读关机电流"
+#define CMD_RACE_R_GSENSOR  "读GSensor"
+#define CMD_RACE_SET_BT_VISIBLE  "蓝牙可见"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     myCom = NULL;
+    init_1wire_tbl();
+    init_race_tbl();
     initCom();
     startThread();
     setRelatedWidgetsStatus(false);
@@ -49,60 +76,93 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::startThread()
+int MainWindow::initialize_cmd_func_map(cmd_func_map_t &map, const cmd_func_list_t list)
 {
-    SerialPortWorker *worker = new SerialPortWorker;
-    worker->moveToThread(&comWorkerThread);
+    for(cmd_func_list_t::const_iterator it = list.begin(); it != list.end(); ++it) {
+        if(map.find(it->first) != map.end()) {
+            QString str;
+            str.sprintf("[%s] duplicate map key: %s", __FUNCTION__, it->first.toStdString().data());
+            qWarning() << str;
+            //return -1;
+        }
+        map.insert(it->first, it->second);
+    }
 
-    // 退出、删除
-    //connect(worker, SIGNAL(finished()), &comWorkerThread, SLOT(quit()));
-    connect(&comWorkerThread, SIGNAL(finished()), worker, SLOT(deleteLater()) );
-
-    connect(this, SIGNAL(dataReceived(QByteArray)), worker, SLOT(doWork(QByteArray)) );
-    connect(worker, SIGNAL(resultReady(QJsonArray)), this, SLOT(handleResults(QJsonArray)) );
-
-    comWorkerThread.start();
+    return 0;
 }
 
-void MainWindow::handleResults(QJsonArray jsarr)
+void MainWindow::init_table_widget(QTableWidget *tbl, const cmd_func_list_t func_list, int col_cnt)
 {
-    //ui->parsedDataBrowser->append(str);
-    /*
-        Data format must be:
-        [
-            QString,
-            QJsonObject,
-            ...
-        ]
-    */
-    static QMutex mutex;
-    QMutexLocker locker(&mutex);
-    ui->parsedDataBrowser->append("");
-    for(QJsonArray::const_iterator it = jsarr.constBegin(); it != jsarr.constEnd(); ++it) {
-        if(it->type() == QJsonValue::String) {
-            QString str = it->toString();
-            ui->parsedDataBrowser->append(str);
-        }
-        else if(it->type() == QJsonValue::Object) {
-            QJsonObject jsobj = it->toObject();
-            for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
-                QString k = obj_it.key();
-                QJsonValue v = obj_it.value();
-                QString v_str = jsonValue2String(v);
-                if(k.contains(KEY_STR_EXCEPTION) || v_str.contains(VALUE_STR_FAIL)) {
-                    //QColor cl = ui->parsedDataBrowser->textColor();
-                    ui->parsedDataBrowser->setTextColor(Qt::red);
-                    ui->parsedDataBrowser->append(k + " : " +  v_str);
-                    //ui->parsedDataBrowser->setTextColor(cl);
-                }
-                else {
-                    ui->parsedDataBrowser->append(k + " : " + v_str );
-                }
-            }
-        }
+    tbl->setWindowTitle(tr("1-Wire指令"));
+    tbl->setWindowFlags(Qt::WindowTitleHint);
+    tbl->setFrameShape(QFrame::NoFrame);
+
+    tbl->horizontalHeader()->setVisible(false);
+    tbl->verticalHeader()->setVisible(false);
+    tbl->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+    tbl->setSelectionMode(QAbstractItemView::SingleSelection);
+    tbl->setSelectionBehavior(QAbstractItemView::SelectItems);
+    tbl->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    int row_cnt =  func_list.size() / col_cnt;
+    if(func_list.size() % col_cnt != 0) {
+        row_cnt += 1;
     }
-    ui->parsedDataBrowser->moveCursor(QTextCursor::End);
-    ui->parsedDataBrowser->setTextColor(Qt::black);
+    tbl->setRowCount(row_cnt);
+    tbl->setColumnCount(col_cnt);
+
+    int i = 0;
+    for(cmd_func_list_t::const_iterator it = func_list.begin(); it != func_list.end(); ++it) {
+        QTableWidgetItem *newItem = new QTableWidgetItem(it->first);
+        newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        tbl->setItem(i / tbl->columnCount(), i % tbl->columnCount(), newItem);
+        ++i;
+    }
+
+    tbl->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    tbl->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    initialize_cmd_func_map(cmd_func_map, func_list);
+}
+
+void MainWindow::init_1wire_tbl()
+{
+    cmd_func_list_t cmd_onewire_func_list = {
+        { CMD_ENTER_1WIRE_COM_MODE, std::bind(&MainWindow::cmd_enter_1wire_com_mode, this) },
+        { CMD_ONEWIRE_R_MAC, std::bind(&MainWindow::cmd_read_mac_addr, this) },
+        { CMD_ONEWIRE_R_VER, std::bind(&MainWindow::cmd_read_fw_ver_addr, this) },
+        { CMD_ONEWIRE_R_CHANNEL, std::bind(&MainWindow::cmd_read_channel, this) },
+        { CMD_ONEWIRE_R_NTC, std::bind(&MainWindow::cmd_read_ntc, this) },
+        { CMD_ONEWIRE_R_BAT_POWER, std::bind(&MainWindow::cmd_read_bat_power, this) },
+        { CMD_ONEWIRE_ACTIV_LIC, std::bind(&MainWindow::cmd_list_active_license_key, this) },
+        { CMD_ONEWIRE_CAPTOUCH_SENSOR, std::bind(&MainWindow::cmd_list_captouch, this) },
+        { CMD_ONEWIRE_OPTIC_SENSOR, std::bind(&MainWindow::cmd_list_optic, this) },
+        { CMD_ONEWIRE_FORCE_SENSOR, std::bind(&MainWindow::cmd_list_force, this) },
+    };
+    init_table_widget(ui->onewire_tbl, cmd_onewire_func_list, 4);
+    ui->onewire_tbl->item(0, 0)->setBackground(Qt::green);
+}
+
+void MainWindow::init_race_tbl()
+{
+    cmd_func_list_t cmd_race_func_list = {
+        { CMD_ENTER_RACE_COM_MODE, std::bind(&MainWindow::cmd_enter_race_com_mode, this) },
+        { CMD_SET_RACE_BAUTE_RATE, std::bind(&MainWindow::cmd_set_race_baud_rate, this) },
+        { CMD_RACE_ENTER_DUT, std::bind(&MainWindow::cmd_earbud_enter_dut, this) },
+        { CMD_RACE_EXIT_DUT, std::bind(&MainWindow::cmd_earbud_exit_dut, this) },
+        { CMD_RACE_POWEROFF, std::bind(&MainWindow::cmd_earbud_power_off, this) },
+        { CMD_RACE_STANDBY, std::bind(&MainWindow::cmd_enter_standby, this) },
+        { CMD_RACE_RESTART, std::bind(&MainWindow::cmd_earbud_restart, this) },
+        { CMD_RACE_R_CHG_CUR, std::bind(&MainWindow::cmd_read_chg_cur, this) },
+        { CMD_RACE_R_WORK_CUR, std::bind(&MainWindow::cmd_read_work_cur, this) },
+        { CMD_RACE_R_BG_CUR, std::bind(&MainWindow::cmd_read_bg_cur, this) },
+        { CMD_RACE_R_POFF_CUR, std::bind(&MainWindow::cmd_read_poff_cur, this) },
+        { CMD_RACE_R_GSENSOR, std::bind(&MainWindow::cmd_read_gsensor, this) },
+        { CMD_RACE_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
+    };
+    init_table_widget(ui->race_tbl, cmd_race_func_list, 4);
+    ui->race_tbl->item(0, 0)->setBackground(Qt::green);
+    ui->race_tbl->item(0, 1)->setBackground(Qt::green);
 }
 
 void MainWindow::checkComPort()
@@ -125,16 +185,6 @@ void MainWindow::initCom()
     ui->stopBitsComboBox->setView(new QListView);
 
     checkComPort();
-}
-
-int MainWindow::closeCom()
-{
-    myCom->close();
-    delete myCom;
-    myCom = NULL;
-    setRelatedWidgetsStatus(false);
-
-    return 0;
 }
 
 int MainWindow::openCom()
@@ -203,6 +253,16 @@ int MainWindow::openCom()
     return 0;
 }
 
+int MainWindow::closeCom()
+{
+    myCom->close();
+    delete myCom;
+    myCom = NULL;
+    setRelatedWidgetsStatus(false);
+
+    return 0;
+}
+
 void MainWindow::setComWidgetsStatus(bool opened)
 {
     bool status = !opened;
@@ -226,6 +286,121 @@ void MainWindow::setRelatedWidgetsStatus(bool opened)
     //ui->chbox_r_sn_btn->setEnabled(enable_status);
     ui->tabWidget->setEnabled(enable_status);
 }
+
+void MainWindow::startThread()
+{
+    SerialPortWorker *worker = new SerialPortWorker;
+    worker->moveToThread(&comWorkerThread);
+
+    // 退出、删除
+    //connect(worker, SIGNAL(finished()), &comWorkerThread, SLOT(quit()));
+    connect(&comWorkerThread, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+
+    connect(this, SIGNAL(dataReceived(QByteArray)), worker, SLOT(doWork(QByteArray)) );
+    connect(worker, SIGNAL(resultReady(QJsonArray)), this, SLOT(handleResults(QJsonArray)) );
+
+    comWorkerThread.start();
+}
+
+int MainWindow::sendHexMsg(QByteArray hexdata)
+{
+    if(NULL == myCom) {
+        QMessageBox::information(this, tr("提示消息"), tr("串口未打开"), QMessageBox::Ok);
+        return -1;
+    }
+
+    if(-1 == myCom->write(hexdata) ) {
+        QMessageBox::critical(this, tr("警告"), tr("发送数据失败！ "), QMessageBox::Ok);
+        return -1;
+    }
+    else {
+        QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        QString timeStrLine= "[" + ts + "]";
+        QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
+        QString content = "<span style=\" color:green;\">" + timeStrLine + tmpstr + hexArray2StringPlusSpace(hexdata) +"\n\r</span>";
+        ui->rawDataBrowser->append(content);
+        //ui->textBrowser->setTextColor(Qt::lightGray);
+    }
+    return 0;
+}
+
+int MainWindow::sendAsciiMsg(QString msg)
+{
+    Q_UNUSED(msg);
+    // TODO:
+    return 0;
+}
+
+void MainWindow::recv_com_data()
+{
+    QThread::msleep(50);
+    QByteArray hexdata = myCom->readAll();
+    QString asciidata;
+
+    if(hexdata.isEmpty()) {
+        return;
+    }
+
+    //static QMutex mutex;
+    //QMutexLocker locker(&mutex);
+    //ui->textBrowser->setTextColor(Qt::black);
+    if(ui->hexRecvRadioBtn->isChecked()){
+        asciidata = hexArray2StringPlusSpace(hexdata);
+    }
+    else {
+        asciidata = hexdata;
+    }
+
+    QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString timeStrLine="[" + ts + "]";
+    QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
+    QString content = "<span style=\" color:blue;\">" + timeStrLine + tmpstr + asciidata + "\n\r" + "</span>";
+    ui->rawDataBrowser->append(content);
+    ui->rawDataBrowser->moveCursor(QTextCursor::End);
+    emit dataReceived(hexdata);
+}
+
+void MainWindow::handleResults(QJsonArray jsarr)
+{
+    //ui->parsedDataBrowser->append(str);
+    /*
+        Data format must be:
+        [
+            QString,
+            QJsonObject,
+            ...
+        ]
+    */
+    static QMutex mutex;
+    QMutexLocker locker(&mutex);
+    ui->parsedDataBrowser->append("");
+    for(QJsonArray::const_iterator it = jsarr.constBegin(); it != jsarr.constEnd(); ++it) {
+        if(it->type() == QJsonValue::String) {
+            QString str = it->toString();
+            ui->parsedDataBrowser->append(str);
+        }
+        else if(it->type() == QJsonValue::Object) {
+            QJsonObject jsobj = it->toObject();
+            for(QJsonObject::const_iterator obj_it = jsobj.constBegin(); obj_it != jsobj.constEnd(); ++obj_it) {
+                QString k = obj_it.key();
+                QJsonValue v = obj_it.value();
+                QString v_str = jsonValue2String(v);
+                if(k.contains(KEY_STR_EXCEPTION) || v_str.contains(VALUE_STR_FAIL)) {
+                    //QColor cl = ui->parsedDataBrowser->textColor();
+                    ui->parsedDataBrowser->setTextColor(Qt::red);
+                    ui->parsedDataBrowser->append(k + " : " +  v_str);
+                    //ui->parsedDataBrowser->setTextColor(cl);
+                }
+                else {
+                    ui->parsedDataBrowser->append(k + " : " + v_str );
+                }
+            }
+        }
+    }
+    ui->parsedDataBrowser->moveCursor(QTextCursor::End);
+    ui->parsedDataBrowser->setTextColor(Qt::black);
+}
+
 
 void MainWindow::on_openCloseBtn_clicked()
 {
@@ -263,69 +438,10 @@ void MainWindow::on_sendmsgBtn_clicked()
     }
 }
 
-int MainWindow::sendAsciiMsg(QString msg)
-{
-    Q_UNUSED(msg);
-    // TODO:
-    return 0;
-}
-
-int MainWindow::sendHexMsg(QByteArray hexdata)
-{
-    if(NULL == myCom) {
-        QMessageBox::information(this, tr("提示消息"), tr("串口未打开"), QMessageBox::Ok);
-        return -1;
-    }
-
-    if(-1 == myCom->write(hexdata) ) {
-        QMessageBox::critical(this, tr("警告"), tr("发送数据失败！ "), QMessageBox::Ok);
-        return -1;
-    }
-    else {
-        QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-        QString timeStrLine= "[" + ts + "]";
-        QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
-        QString content = "<span style=\" color:green;\">" + timeStrLine + tmpstr + hexArray2StringPlusSpace(hexdata) +"\n\r</span>";
-        ui->rawDataBrowser->append(content);
-        //ui->textBrowser->setTextColor(Qt::lightGray);
-    }
-    return 0;
-}
-
-void MainWindow::recv_com_data()
-{
-    QThread::msleep(50);
-    QByteArray hexdata = myCom->readAll();
-    QString asciidata;
-
-    if(hexdata.isEmpty()) {
-        return;
-    }
-
-    //static QMutex mutex;
-    //QMutexLocker locker(&mutex);
-    //ui->textBrowser->setTextColor(Qt::black);
-    if(ui->hexRecvRadioBtn->isChecked()){
-        asciidata = hexArray2StringPlusSpace(hexdata);
-    }
-    else {
-        asciidata = hexdata;
-    }
-
-    QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-    QString timeStrLine="[" + ts + "]";
-    QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
-    QString content = "<span style=\" color:blue;\">" + timeStrLine + tmpstr + asciidata + "\n\r" + "</span>";
-    ui->rawDataBrowser->append(content);
-    ui->rawDataBrowser->moveCursor(QTextCursor::End);
-    emit dataReceived(hexdata);
-}
-
 void MainWindow::on_comCheckBtn_clicked()
 {
     checkComPort();
 }
-
 
 void MainWindow::on_clearUpBtn_clicked()
 {
@@ -367,7 +483,6 @@ void MainWindow::on_chgbox_wSN_btn_clicked()
 
 }
 
-
 void MainWindow::on_chbox_r_sn_btn_clicked()
 {
     QByteArray hexcmd;
@@ -376,10 +491,65 @@ void MainWindow::on_chbox_r_sn_btn_clicked()
     }
 }
 
-
-void MainWindow::on_r_mac_btn_clicked()
+void MainWindow::on_onewire_tbl_cellClicked(int row, int column)
 {
-    cmd_read_mac_addr();
+    QTableWidgetItem *item = ui->onewire_tbl->currentItem();
+    if(item == nullptr) {
+        qDebug() << "NULL item";
+        return;
+    }
+    qDebug("onewire table, r=%d, c=%d, content:%s", row, column, item->text().toStdString().c_str());
+
+    exec_cmd_func(item->text());
+}
+
+void MainWindow::on_race_tbl_cellClicked(int row, int column)
+{
+    QTableWidgetItem *item = ui->race_tbl->currentItem();
+    if(item == nullptr) {
+        qDebug() << "NULL item";
+        return;
+    }
+    qDebug("race table, r=%d, c=%d, content:%s", row, column, item->text().toStdString().c_str());
+
+    exec_cmd_func(item->text());
+}
+
+void MainWindow::exec_cmd_func(QString k)
+{
+    cmd_func_map_t::iterator it = cmd_func_map.find(k);
+    if(it != cmd_func_map.end()) {
+        if(k == CMD_ONEWIRE_ACTIV_LIC || k == CMD_ONEWIRE_CAPTOUCH_SENSOR || k == CMD_ONEWIRE_OPTIC_SENSOR || k == CMD_ONEWIRE_FORCE_SENSOR) {
+            QtConcurrent::run(it.value());
+        }
+        else {
+            it.value()();
+        }
+    }
+}
+
+void MainWindow::cmd_enter_1wire_com_mode()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_1wire_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_enter_race_com_mode()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_enter_race_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_set_race_baud_rate()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
 }
 
 void MainWindow::cmd_read_mac_addr()
@@ -398,11 +568,6 @@ void MainWindow::cmd_read_fw_ver_addr()
     }
 }
 
-void MainWindow::on_r_fw_ver_btn_clicked()
-{
-    cmd_read_fw_ver_addr();
-}
-
 void MainWindow::cmd_read_channel()
 {
     QByteArray cmd;
@@ -411,12 +576,7 @@ void MainWindow::cmd_read_channel()
     }
 }
 
-void MainWindow::on_r_channel_btn_clicked()
-{
-    cmd_read_channel();
-}
-
-void MainWindow::cmd_read_temperature()
+void MainWindow::cmd_read_ntc()
 {
     QByteArray cmd;
     if(RET_OK == earbud_construct_cmd_read_temperature(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
@@ -424,12 +584,15 @@ void MainWindow::cmd_read_temperature()
     }
 }
 
-void MainWindow::on_r_ntc_btn_clicked()
+void MainWindow::cmd_read_bat_power()
 {
-    cmd_read_temperature();
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_read_bat_power(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
 }
 
-void MainWindow::cmd_active_license_key()
+void MainWindow::cmd_list_active_license_key()
 {
 #ifdef DUMP_THREAD_ID
     qDebug() << "MainWindow:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
@@ -450,14 +613,6 @@ void MainWindow::cmd_active_license_key()
     if(RET_OK == earbud_construct_cmd_get_license_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
-}
-
-void MainWindow::on_r_active_license_btn_clicked()
-{
-#ifdef DUMP_THREAD_ID
-    qDebug() << "MainWindow:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
-#endif
-    QtConcurrent::run(this, &MainWindow::cmd_active_license_key);
 }
 
 void MainWindow::cmd_captouch_start_interrupt()
@@ -528,12 +683,6 @@ void MainWindow::cmd_list_captouch()
     cmd_captouch_read_value();
 
 }
-
-void MainWindow::on_captouch_test_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_captouch);
-}
-
 
 void MainWindow::cmd_optic_communicate()
 {
@@ -636,11 +785,6 @@ void MainWindow::cmd_list_optic()
     cmd_optic_bg_noise_end();
 }
 
-void MainWindow::on_optic_test_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_optic);
-}
-
 void MainWindow::cmd_force_start_detect()
 {
     QByteArray cmd;
@@ -709,76 +853,26 @@ void MainWindow::cmd_list_force()
     cmd_force_get_semph();
 }
 
-void MainWindow::on_force_sensor_test_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_force);
-}
-
-void MainWindow::on_charge_cur_btn_clicked()
-{
-
-}
-
-void MainWindow::cmd_enter_age_mode()
+void MainWindow::cmd_earbud_enter_dut()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
 
-void MainWindow::cmd_chgbox_enter_com_mode()
+void MainWindow::cmd_earbud_exit_dut()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_chgbox_enter_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
 
-void MainWindow::on_chgbox_enter_com_mode_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_chbox_enter_com_mode);
-}
-
-void MainWindow::cmd_chgbox_exit_com_mode()
+void MainWindow::cmd_earbud_power_off()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_chgbox_exit_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
-}
-
-void MainWindow::cmd_list_chbox_enter_com_mode()
-{
-    cmd_chgbox_exit_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_chgbox_enter_com_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_set_vbus_baud_rate();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-}
-
-void MainWindow::on_chgbox_exit_com_mode_2_clicked()
-{
-    cmd_chgbox_exit_com_mode();
-}
-
-void MainWindow::cmd_list_get_work_cur()
-{
-    cmd_enter_age_mode();
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_list_chbox_enter_com_mode();
-}
-
-void MainWindow::on_work_cur_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_get_work_cur);
-}
-
-void MainWindow::cmd_set_vbus_baud_rate()
-{
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construc_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -791,31 +885,6 @@ void MainWindow::cmd_enter_standby()
     }
 }
 
-void MainWindow::cmd_list_enter_standby()
-{
-    cmd_list_chbox_enter_com_mode();
-    cmd_enter_standby();
-}
-
-void MainWindow::on_sleep_cur_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_enter_standby);
-}
-
-void MainWindow::cmd_earbud_power_off()
-{
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
-}
-
-void MainWindow::cmd_list_power_off()
-{
-    cmd_list_chbox_enter_com_mode();
-    cmd_earbud_power_off();
-}
-
 void MainWindow::cmd_earbud_restart()
 {
     QByteArray cmd;
@@ -824,55 +893,24 @@ void MainWindow::cmd_earbud_restart()
     }
 }
 
-void MainWindow::cmd_list_earbud_restart()
+void MainWindow::cmd_read_chg_cur()
 {
-    cmd_list_chbox_enter_com_mode();
 
-
-    // 因为耳机重启指令的回复数据和待机命令一样,所以直接在这里显示"重启"提示信息.
-    //QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    //QJsonArray jsarr;
-    //jsarr.append("耳机将重启...");
-    //handleResults(jsarr);
-    cmd_earbud_restart();
 }
 
-void MainWindow::cmd_earbud_enter_dut()
+void MainWindow::cmd_read_work_cur()
 {
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
+
 }
 
-void MainWindow::cmd_list_earbud_enter_dut()
+void MainWindow::cmd_read_bg_cur()
 {
-    cmd_list_chbox_enter_com_mode();
 
-    // 因为耳机进入/退出DUT的回复数据和待机命令一样,所以直接在这里显示提示信息.
-    //QJsonArray jsarr;
-    //jsarr.append("进入DUT");
-    //handleResults(jsarr);
-    cmd_earbud_enter_dut();
 }
 
-void MainWindow::cmd_earbud_exit_dut()
+void MainWindow::cmd_read_poff_cur()
 {
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
-}
 
-void MainWindow::cmd_list_earbud_exit_dut()
-{
-    cmd_list_chbox_enter_com_mode();
-
-    // 因为耳机进入/退出DUT的回复数据和待机命令一样,所以直接在这里显示提示信息.
-    //QJsonArray jsarr;
-    //jsarr.append("退出DUT");
-    //handleResults(jsarr);
-    cmd_earbud_exit_dut();
 }
 
 void MainWindow::cmd_read_gsensor()
@@ -883,58 +921,19 @@ void MainWindow::cmd_read_gsensor()
     }
 }
 
-void MainWindow::cmd_list_read_gsensor()
+void MainWindow::cmd_set_bt_visible()
 {
-    cmd_list_chbox_enter_com_mode();
-    cmd_read_gsensor();
+
 }
 
-void MainWindow::cmd_read_bat_power()
+void MainWindow::cmd_enter_age_mode()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_read_bat_power(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == earbud_construc_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
 
-void MainWindow::on_power_off_cur_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_power_off);
-}
-
-void MainWindow::on_eb_enter_dut_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_enter_dut);
-}
-
-void MainWindow::on_eb_exit_dut_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_exit_dut);
-}
-
-void MainWindow::on_eb_restart_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_earbud_restart);
-}
-
-void MainWindow::on_bat_data_btn_clicked()
-{
-    cmd_read_bat_power();
-}
-
-void MainWindow::on_gsensor_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_read_gsensor);
-}
 
 
-void MainWindow::on_eb_standby_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_enter_standby);
-}
-
-void MainWindow::on_eb_poweroff_btn_clicked()
-{
-    QtConcurrent::run(this, &MainWindow::cmd_list_power_off);
-}
 

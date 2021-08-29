@@ -116,11 +116,11 @@ int earbud_parse_notify_force_get_semph(const QByteArray hexdata, QJsonArray &js
 int earbud_construc_cmd_enter_age_mode(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_enter_age_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
-int earbud_construc_cmd_chgbox_enter_com_mode(QByteArray &cmd, uint8_t earside);
-int earbud_parse_notify_chgbox_enter_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
+int earbud_construc_cmd_enter_race_com_mode(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_enter_race_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
-int earbud_construc_cmd_chgbox_exit_com_mode(QByteArray &cmd, uint8_t earside);
-int earbud_parse_notify_chgbox_exit_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
+int earbud_construc_cmd_enter_1wire_com_mode(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_enter_1wire_com_mode(const QByteArray hexdata, QJsonArray &jsarr);
 
 int earbud_construc_cmd_set_vbus_baud_rate(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_set_vbus_baud_rate(const QByteArray hexdata, QJsonArray &jsarr);

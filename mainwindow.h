@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QTimer>
+#include <QMap>
+#include <QTableWidget>
 
 #include "qextserial/qextserialport.h"
 
@@ -20,6 +22,12 @@
 //载入文件最大长度限制在MAX_FILE_SIZE字节内
 #define MAX_FILE_SIZE 10000
 
+typedef QString cmd_func_uuid_t;
+typedef std::function<void()> cmd_func_t;
+typedef QMap<cmd_func_uuid_t, cmd_func_t> cmd_func_map_t;
+typedef std::pair<cmd_func_uuid_t, cmd_func_t> cmd_func_pair_t;
+typedef std::initializer_list<cmd_func_pair_t> cmd_func_list_t;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -32,85 +40,57 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    int initialize_cmd_func_map(cmd_func_map_t &map, const cmd_func_list_t list);
+    void init_table_widget(QTableWidget *tbl, const cmd_func_list_t func_list, int col_cnt);
+    void init_1wire_tbl();
+    void init_race_tbl();
+    void checkComPort();
+    void initCom();
+    int openCom();
+    int closeCom();
+    void setComWidgetsStatus(bool opened);
+    void setRelatedWidgetsStatus(bool opened);
+
+protected:
     void startThread();
+    int sendHexMsg(QByteArray hexdata);
+    int sendAsciiMsg(QString msg);
+
+signals:
+    void dataReceived(QByteArray hexdata);
 
 private slots:
-    void on_openCloseBtn_clicked();
-    void on_sendmsgBtn_clicked();
-
     void recv_com_data();
     void handleResults(QJsonArray jsarr);
+
+    void on_openCloseBtn_clicked();
+    void on_sendmsgBtn_clicked();
 
     void on_comCheckBtn_clicked();
     void on_clearUpBtn_clicked();
     void on_clearUpBtn2_clicked();
     void on_chgbox_basic_FT_btn_clicked();
     void on_chgbox_wSN_btn_clicked();
-
     void on_chbox_r_sn_btn_clicked();
 
-    void on_r_mac_btn_clicked();
+    void on_onewire_tbl_cellClicked(int row, int column);
+    void on_race_tbl_cellClicked(int row, int column);
 
-    void on_r_fw_ver_btn_clicked();
+private:
+    void exec_cmd_func(QString k);
+private:
+    void cmd_enter_1wire_com_mode();
+    void cmd_enter_race_com_mode();
+    void cmd_set_race_baud_rate();
 
-    void on_r_channel_btn_clicked();
-
-    void on_r_ntc_btn_clicked();
-
-    void on_r_active_license_btn_clicked();
-
-    void on_captouch_test_btn_clicked();
-
-    void on_optic_test_btn_clicked();
-
-    void on_force_sensor_test_btn_clicked();
-
-    void on_charge_cur_btn_clicked();
-
-    void on_work_cur_btn_clicked();
-
-    void on_sleep_cur_btn_clicked();
-
-    void on_power_off_cur_btn_clicked();
-
-    void on_chgbox_enter_com_mode_clicked();
-
-    void on_chgbox_exit_com_mode_2_clicked();
-
-    void on_eb_enter_dut_btn_clicked();
-
-    void on_eb_exit_dut_btn_clicked();
-
-    void on_eb_restart_btn_clicked();
-
-    void on_bat_data_btn_clicked();
-
-    void on_gsensor_btn_clicked();
-
-    void on_eb_standby_btn_clicked();
-
-    void on_eb_poweroff_btn_clicked();
-
-signals:
-    void dataReceived(QByteArray hexdata);
-
-protected:
-    void checkComPort();
-    void initCom();
-    int openCom();
-    int closeCom();
-    int sendHexMsg(QByteArray hexdata);
-    int sendAsciiMsg(QString msg);
-
-
-    void setRelatedWidgetsStatus(bool opened);
-    void setComWidgetsStatus(bool opened);
-
+private:
     void cmd_read_mac_addr();
     void cmd_read_fw_ver_addr();
     void cmd_read_channel();
-    void cmd_read_temperature();
-    void cmd_active_license_key();
+    void cmd_read_ntc();
+    void cmd_read_bat_power();
+    void cmd_list_active_license_key();
 
     void cmd_captouch_start_interrupt();
     void cmd_captouch_get_interrupt_result();
@@ -139,38 +119,25 @@ protected:
     void cmd_force_get_semph();
     void cmd_list_force();
 
-    void cmd_enter_age_mode();
-    void cmd_chgbox_enter_com_mode();
-    void cmd_chgbox_exit_com_mode();
-    void cmd_set_vbus_baud_rate();
-    void cmd_list_chbox_enter_com_mode();
-    void cmd_list_get_work_cur();
-
-    void cmd_enter_standby();
-    void cmd_list_enter_standby();
-
-    void cmd_earbud_power_off();
-    void cmd_list_power_off();
-
-    void cmd_earbud_restart();
-    void cmd_list_earbud_restart();
-
+private:
     void cmd_earbud_enter_dut();
-    void cmd_list_earbud_enter_dut();
-
     void cmd_earbud_exit_dut();
-    void cmd_list_earbud_exit_dut();
-
+    void cmd_earbud_power_off();
+    void cmd_enter_standby();
+    void cmd_earbud_restart();
+    void cmd_read_chg_cur();
+    void cmd_read_work_cur();
+    void cmd_read_bg_cur();
+    void cmd_read_poff_cur();
     void cmd_read_gsensor();
-    void cmd_list_read_gsensor();
+    void cmd_set_bt_visible();
 
-    void cmd_read_bat_power();
+    void cmd_enter_age_mode();
 
 private:
     Ui::MainWindow *ui;
-    QThread comWorkerThread;
     QextSerialPort *myCom;
-    bool s;
-
+    QThread comWorkerThread;
+    cmd_func_map_t cmd_func_map;
 };
 #endif // MAINWINDOW_H

@@ -140,8 +140,8 @@ static parse_func_list_t earbud_parse_func_list = {
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_SET_VBUS_BAUD_RATE), earbud_parse_notify_set_vbus_baud_rate },
     {earbud_make_key(RACE_USR_ID1, RACE_USR_ID2, EARBUD_CMD_READ_BAT_POWER), earbud_parse_notify_read_bat_power },
 
-    {"FE0F00", earbud_parse_notify_chgbox_exit_com_mode },
-    {"FE0F01", earbud_parse_notify_chgbox_enter_com_mode },
+    {"FE0F00", earbud_parse_notify_enter_1wire_com_mode },
+    {"FE0F01", earbud_parse_notify_enter_race_com_mode },
 
     {"0111", earbud_parse_rsp_standby_or_restart },
     {"2700", earbud_parse_rsp_power_off },
@@ -1009,8 +1009,8 @@ int earbud_parse_notify_enter_age_mode(const QByteArray hexdata, QJsonArray &jsa
 }
 
 #define EARBUD_CMD_LENGTH_CHGBOX_ENTER_COM_MODE    9
-#define EARBUD_NOTIFY_LENGTH_CHGBOX_ENTER_COM_MODE    9
-int earbud_construc_cmd_chgbox_enter_com_mode(QByteArray &cmd, uint8_t earside)
+#define EARBUD_NOTIFY_LENGTH_CHGBOX_ENTER_RACE_COM_MODE    9
+int earbud_construc_cmd_enter_race_com_mode(QByteArray &cmd, uint8_t earside)
 {
     Q_UNUSED(earside);
     QString str = "FE F0 01 00 00 00 00 00 00";
@@ -1021,10 +1021,10 @@ int earbud_construc_cmd_chgbox_enter_com_mode(QByteArray &cmd, uint8_t earside)
     return RET_OK;
 }
 
-int earbud_parse_notify_chgbox_enter_com_mode(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_enter_race_com_mode(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    QString topic = "盒子进入通信模式";
-    if(EARBUD_NOTIFY_LENGTH_CHGBOX_ENTER_COM_MODE > hexdata.count() ) {
+    QString topic = "进入RACE通信模式";
+    if(EARBUD_NOTIFY_LENGTH_CHGBOX_ENTER_RACE_COM_MODE > hexdata.count() ) {
         jsarr.append(topic);
         addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
         return RET_FAIL;
@@ -1038,9 +1038,9 @@ int earbud_parse_notify_chgbox_enter_com_mode(const QByteArray hexdata, QJsonArr
 }
 
 //#define EARBUD_CMD_LENGTH_CHGBOX_EXIT_COM_MODE    9
-#define EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE    9
+#define EARBUD_NOTIFY_LENGTH_ENTER_1WIRE_COM_MODE    9
 
-int earbud_construc_cmd_chgbox_exit_com_mode(QByteArray &cmd, uint8_t earside)
+int earbud_construc_cmd_enter_1wire_com_mode(QByteArray &cmd, uint8_t earside)
 {
     Q_UNUSED(earside);
     QString str = "FE F0 00 00 00 00 00 00 00";
@@ -1051,10 +1051,10 @@ int earbud_construc_cmd_chgbox_exit_com_mode(QByteArray &cmd, uint8_t earside)
     return RET_OK;
 }
 
-int earbud_parse_notify_chgbox_exit_com_mode(const QByteArray hexdata, QJsonArray &jsarr)
+int earbud_parse_notify_enter_1wire_com_mode(const QByteArray hexdata, QJsonArray &jsarr)
 {
-    QString topic = "盒子退出通信模式";
-    if(EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE > hexdata.count() ) {
+    QString topic = "进入1-Wire通信模式";
+    if(EARBUD_NOTIFY_LENGTH_ENTER_1WIRE_COM_MODE > hexdata.count() ) {
         jsarr.append(topic);
         addInfo2Array(jsarr, KEY_STR_EXCEPTION, "回复数据长度错误！", true);
         return RET_FAIL;
@@ -1069,7 +1069,7 @@ int earbud_parse_notify_chgbox_exit_com_mode(const QByteArray hexdata, QJsonArra
 
 bool is_notify_from_earbud_chgbox_com_mode(const QByteArray &hexdata)
 {
-    if( EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE <= hexdata.count() && 0xFE == (uint8_t)hexdata[0] && 0x0F == (uint8_t)hexdata[1] ) {
+    if( EARBUD_NOTIFY_LENGTH_ENTER_1WIRE_COM_MODE <= hexdata.count() && 0xFE == (uint8_t)hexdata[0] && 0x0F == (uint8_t)hexdata[1] ) {
         return true;
     }
     return false;
@@ -1078,7 +1078,7 @@ bool is_notify_from_earbud_chgbox_com_mode(const QByteArray &hexdata)
 QString earbud_chgbox_com_mode_get_notify_key(const QByteArray &hexdata)
 {
     QString key;
-    if(EARBUD_NOTIFY_LENGTH_CHGBOX_EXIT_COM_MODE <= hexdata.count() ) {
+    if(EARBUD_NOTIFY_LENGTH_ENTER_1WIRE_COM_MODE <= hexdata.count() ) {
         key.sprintf("%02X%02X%02X", (uint8_t)hexdata[0], (uint8_t)hexdata[1], (uint8_t)hexdata[4] );
     }
 
