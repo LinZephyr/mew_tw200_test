@@ -147,6 +147,7 @@ static parse_func_list_t earbud_parse_func_list = {
     {"2700", earbud_parse_rsp_power_off },
     {"010A", earbud_parse_rsp_enter_exit_dut },
     {"0100", earbud_parse_rsp_read_gsensor },
+    {"011100", earbud_parse_notify_set_bt_visible },
 
 };
 
@@ -1286,3 +1287,33 @@ int earbud_parse_notify_read_bat_power(const QByteArray hexdata, QJsonArray &jsa
     return RET_OK;
 }
 
+int earbud_construc_cmd_set_bt_visible(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 08 05 5A 04 00 01 11 02 00";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_notify_set_bt_visible(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "蓝牙可见";
+    QJsonObject jsobj;
+    QString correct_rsp = "FE FC 00 07 05 5B 03 00 01 11 00";
+    QByteArray correct_arr;
+
+    string2HexArray(correct_rsp, correct_arr);
+    if(hexdata.startsWith(correct_arr)) {
+        jsobj.insert(topic, VALUE_STR_SUCCESS);
+    }
+    else {
+        jsobj.insert(topic, VALUE_STR_FAIL);
+    }
+
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}

@@ -142,7 +142,8 @@ int earbud_parse_rsp_read_gsensor(const QByteArray hexdata, QJsonArray &jsarr);
 int earbud_construc_cmd_read_bat_power(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_read_bat_power(const QByteArray hexdata, QJsonArray &jsarr);
 
-
+int earbud_construc_cmd_set_bt_visible(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_set_bt_visible(const QByteArray hexdata, QJsonArray &jsarr);
 
 
 #endif // EARBUD_H

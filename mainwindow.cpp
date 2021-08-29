@@ -500,24 +500,31 @@ void MainWindow::on_chbox_r_sn_btn_clicked()
 
 void MainWindow::on_onewire_tbl_cellClicked(int row, int column)
 {
+    Q_UNUSED(row);
+    Q_UNUSED(column);
+
     QTableWidgetItem *item = ui->onewire_tbl->currentItem();
     if(item == nullptr) {
         qDebug() << "NULL item";
         return;
     }
-    qDebug("onewire table, r=%d, c=%d, content:%s", row, column, item->text().toStdString().c_str());
+    qDebug("race table, content:%s", item->text().toStdString().c_str());
 
     exec_cmd_func(item->text());
 }
 
 void MainWindow::on_race_tbl_cellClicked(int row, int column)
 {
+    Q_UNUSED(row);
+    Q_UNUSED(column);
+
     QTableWidgetItem *item = ui->race_tbl->currentItem();
     if(item == nullptr) {
         qDebug() << "NULL item";
         return;
     }
-    qDebug("race table, r=%d, c=%d, content:%s", row, column, item->text().toStdString().c_str());
+    //qDebug("race table, r=%d, c=%d, content:%s", row, column, item->text().toStdString().c_str());
+    qDebug("race table, content:%s", item->text().toStdString().c_str());
 
     exec_cmd_func(item->text());
 }
@@ -966,7 +973,10 @@ void MainWindow::cmd_read_gsensor()
 
 void MainWindow::cmd_set_bt_visible()
 {
-
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_set_bt_visible(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
 }
 
 void MainWindow::cmd_enter_age_mode()
