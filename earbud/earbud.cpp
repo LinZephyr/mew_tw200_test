@@ -614,36 +614,57 @@ int earbud_parse_notify_captouch_read_value(const QByteArray hexdata, QJsonArray
         return RET_FAIL;
     }
 
-    QJsonObject jsobj;
+
     uint8_t idx = sizeof(earbud_vbus_notify_header_t);
     if(0 != hexdata[idx]) {
+        QJsonObject jsobj;
         jsobj.insert(topic, "无效值");
         jsarr.append(jsobj);
         return RET_FAIL;
     }
 
     jsarr.append(topic);
-    ++idx;
-    uint16_t diff1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
-    jsobj.insert("按键diff值", diff1);
 
-    idx += 2;
-    uint16_t diff2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
-    jsobj.insert("入耳diff值", diff2);
+    {
+        QJsonObject jsobj;
+        ++idx;
+        uint16_t diff1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+        jsobj.insert("按键diff值", diff1);
+        jsarr.append(jsobj);
+    }
 
-    idx += 2;
-    uint16_t cap1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
-    jsobj.insert("按键容值", cap1);
 
-    idx += 2;
-    uint16_t cap2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
-    jsobj.insert("入耳容值", cap2);
+    {
+        QJsonObject jsobj;
+        idx += 2;
+        uint16_t diff2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+        jsobj.insert("入耳diff值", diff2);
+        jsarr.append(jsobj);
+    }
 
-    idx += 2;
-    uint16_t capref = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
-    jsobj.insert("参考容值", capref);
+    {
+        QJsonObject jsobj;
+        idx += 2;
+        uint16_t cap1 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+        jsobj.insert("按键容值", cap1);
+        jsarr.append(jsobj);
+    }
 
-    jsarr.append(jsobj);
+    {
+        QJsonObject jsobj;
+        idx += 2;
+        uint16_t cap2 = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+        jsobj.insert("入耳容值", cap2);
+        jsarr.append(jsobj);
+    }
+
+    {
+        QJsonObject jsobj;
+        idx += 2;
+        uint16_t capref = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+        jsobj.insert("参考容值", capref);
+        jsarr.append(jsobj);
+    }
 
     return 0;
 }

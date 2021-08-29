@@ -318,6 +318,7 @@ int MainWindow::sendHexMsg(QByteArray hexdata)
         QString timeStrLine= "[" + ts + "]";
         QString tmpstr = "[ " + QString::number(hexdata.count(), 10) + " ]: ";
         QString content = "<span style=\" color:green;\">" + timeStrLine + tmpstr + hexArray2StringPlusSpace(hexdata) +"\n\r</span>";
+        ui->rawDataBrowser->append("");
         ui->rawDataBrowser->append(content);
         //ui->textBrowser->setTextColor(Qt::lightGray);
     }
@@ -520,6 +521,7 @@ void MainWindow::exec_cmd_func(QString k)
     cmd_func_map_t::iterator it = cmd_func_map.find(k);
     if(it != cmd_func_map.end()) {
         if(k == CMD_ONEWIRE_ACTIV_LIC || k == CMD_ONEWIRE_CAPTOUCH_SENSOR || k == CMD_ONEWIRE_OPTIC_SENSOR || k == CMD_ONEWIRE_FORCE_SENSOR) {
+            qDebug() << "create a new thread to exec command list";
             QtConcurrent::run(it.value());
         }
         else {
@@ -665,22 +667,57 @@ void MainWindow::cmd_captouch_read_value()
 
 void MainWindow::cmd_list_captouch()
 {
-    cmd_captouch_start_interrupt();
-
-    QThread::msleep(2000);
-    cmd_captouch_get_interrupt_result();
-
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_captouch_read_version();
-
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
+    // 不要放在金属上面，校准的时候不要触摸
     cmd_captouch_start_calib();
-
     QThread::msleep(3000);
-    cmd_captouch_get_calib_result();
 
-    QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
-    cmd_captouch_read_value();
+    cmd_captouch_get_calib_result();
+    QThread::msleep(3000);
+
+    // 靠近到目标距离固定不动，延时3S后读diff
+    /*
+        判断第13字节为0，则后 5个unsigned short 有效
+        分别是 diff1，diff2，cap1，cap2，capref
+        diff1：按键diff值, 0x0001, pass范围需要取样100
+        diff2：入耳diff值, 0x0002, pass范围需要取样100
+        cap1：按键容值, 0x099C, pass范围需要取样100
+        cap2：入耳容值, 0x0A14, pass范围需要取样100
+        capref：参考容值, 0x11E4, pass范围需要取样100
+
+        此时不要按压，读初始容值，读3次所有参数并取平均，每次间隔1秒，diff1/diff2要等于0，cap1/cap2/capref要大于0（具体数值待取30pcs确认）
+    */
+    for(int i = 0; i < 3; ++i) {
+        cmd_captouch_read_value();
+        QThread::msleep(1000);
+    }
+
+    cmd_captouch_read_version();
+    QThread::msleep(1000);
+
+    // 00成功，01失败，03测试中，1s内读到03, 2s后读到00
+    cmd_captouch_start_interrupt();
+    QThread::msleep(2000);
+
+    cmd_captouch_get_interrupt_result();
+    QThread::msleep(3000);
+
+    // 延时3秒，用于给测试人员按压并保持按压稳定
+    // 靠近到目标距离固定不动，延时3S后读diff
+    /*
+        判断第13字节为0，则后 5个unsigned short 有效
+        分别是 diff1，diff2，cap1，cap2，capref
+        diff1：按键diff值, 0x0001, pass范围需要取样100
+        diff2：入耳diff值, 0x0002, pass范围需要取样100
+        cap1：按键容值, 0x099C, pass范围需要取样100
+        cap2：入耳容值, 0x0A14, pass范围需要取样100
+        capref：参考容值, 0x11E4, pass范围需要取样100
+
+        此时按键和入耳都处于按压状态，读初始容值，读3次所有参数并取平均，每次间隔1秒，diff1/diff2要大于0，cap1/cap2/capref也要大于0（具体数值待取30pcs确认）
+    */
+    for(int i = 0; i < 3; ++i) {
+        cmd_captouch_read_value();
+        QThread::msleep(1000);
+    }
 
 }
 
