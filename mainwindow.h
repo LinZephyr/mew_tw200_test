@@ -83,6 +83,7 @@ private:
     void cmd_enter_1wire_com_mode();
     void cmd_enter_race_com_mode();
     void cmd_set_race_baud_rate();
+    void cmd_list_enter_race_com_mode();
 
 private:
     void cmd_read_mac_addr();
@@ -120,6 +121,11 @@ private:
     void cmd_list_force();
 
 private:
+    void cmd_read_gsensor();
+    void cmd_set_bt_visible();
+    void cmd_select_pcb_mic();
+    void cmd_select_ff_mic();
+    void cmd_select_fb_mic();
     void cmd_earbud_enter_dut();
     void cmd_earbud_exit_dut();
     void cmd_earbud_power_off();
@@ -129,9 +135,6 @@ private:
     void cmd_read_work_cur();
     void cmd_read_bg_cur();
     void cmd_read_poff_cur();
-    void cmd_read_gsensor();
-    void cmd_set_bt_visible();
-
     void cmd_enter_age_mode();
 
 private:

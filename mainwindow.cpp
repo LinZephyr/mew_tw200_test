@@ -28,6 +28,11 @@
 
 #define CMD_ENTER_RACE_COM_MODE  "开始RACE通信"
 #define CMD_SET_RACE_BAUTE_RATE "设置RACE波特率"
+#define CMD_RACE_R_GSENSOR  "读GSensor"
+#define CMD_RACE_SET_BT_VISIBLE  "蓝牙可见"
+#define CMD_RACE_SELECT_PCB_MIC "选择主板MIC"
+#define CMD_RACE_SELECT_FF_MIC "选择FF MIC"
+#define CMD_RACE_SELECT_FB_MIC "选择FB MIC"
 #define CMD_RACE_ENTER_DUT  "进入DUT"
 #define CMD_RACE_EXIT_DUT   "退出DUT"
 #define CMD_RACE_POWEROFF   "关机"
@@ -37,8 +42,6 @@
 #define CMD_RACE_R_WORK_CUR "读工作电流"
 #define CMD_RACE_R_BG_CUR   "读底电流"
 #define CMD_RACE_R_POFF_CUR "读关机电流"
-#define CMD_RACE_R_GSENSOR  "读GSensor"
-#define CMD_RACE_SET_BT_VISIBLE  "蓝牙可见"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -152,8 +155,13 @@ void MainWindow::init_1wire_tbl()
 void MainWindow::init_race_tbl()
 {
     cmd_func_list_t cmd_race_func_list = {
-        { CMD_ENTER_RACE_COM_MODE, std::bind(&MainWindow::cmd_enter_race_com_mode, this) },
-        { CMD_SET_RACE_BAUTE_RATE, std::bind(&MainWindow::cmd_set_race_baud_rate, this) },
+        { CMD_ENTER_RACE_COM_MODE, std::bind(&MainWindow::cmd_list_enter_race_com_mode, this) },
+        //{ CMD_SET_RACE_BAUTE_RATE, std::bind(&MainWindow::cmd_set_race_baud_rate, this) },
+        { CMD_RACE_R_GSENSOR, std::bind(&MainWindow::cmd_read_gsensor, this) },
+        { CMD_RACE_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
+        { CMD_RACE_SELECT_PCB_MIC, std::bind(&MainWindow::cmd_select_pcb_mic, this) },
+        { CMD_RACE_SELECT_FF_MIC, std::bind(&MainWindow::cmd_select_ff_mic, this) },
+        { CMD_RACE_SELECT_FB_MIC, std::bind(&MainWindow::cmd_select_fb_mic, this) },
         { CMD_RACE_ENTER_DUT, std::bind(&MainWindow::cmd_earbud_enter_dut, this) },
         { CMD_RACE_EXIT_DUT, std::bind(&MainWindow::cmd_earbud_exit_dut, this) },
         { CMD_RACE_POWEROFF, std::bind(&MainWindow::cmd_earbud_power_off, this) },
@@ -163,12 +171,9 @@ void MainWindow::init_race_tbl()
         { CMD_RACE_R_WORK_CUR, std::bind(&MainWindow::cmd_read_work_cur, this) },
         { CMD_RACE_R_BG_CUR, std::bind(&MainWindow::cmd_read_bg_cur, this) },
         { CMD_RACE_R_POFF_CUR, std::bind(&MainWindow::cmd_read_poff_cur, this) },
-        { CMD_RACE_R_GSENSOR, std::bind(&MainWindow::cmd_read_gsensor, this) },
-        { CMD_RACE_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
     };
     init_table_widget(ui->race_tbl, cmd_race_func_list, 4);
     ui->race_tbl->item(0, 0)->setBackgroundColor(Qt::darkGreen);
-    ui->race_tbl->item(0, 1)->setBackgroundColor(Qt::darkGreen);
 }
 
 void MainWindow::checkComPort()
@@ -533,7 +538,12 @@ void MainWindow::exec_cmd_func(QString k)
 {
     cmd_func_map_t::iterator it = cmd_func_map.find(k);
     if(it != cmd_func_map.end()) {
-        if(k == CMD_ONEWIRE_ACTIV_LIC || k == CMD_ONEWIRE_CAPTOUCH_SENSOR || k == CMD_ONEWIRE_OPTIC_SENSOR || k == CMD_ONEWIRE_FORCE_SENSOR) {
+        if(k == CMD_ONEWIRE_ACTIV_LIC
+                || k == CMD_ONEWIRE_CAPTOUCH_SENSOR
+                || k == CMD_ONEWIRE_OPTIC_SENSOR
+                || k == CMD_ONEWIRE_FORCE_SENSOR
+                || k == CMD_ENTER_RACE_COM_MODE
+        ) {
             qDebug() << "create a new thread to exec command list";
             QtConcurrent::run(it.value());
         }
@@ -565,6 +575,14 @@ void MainWindow::cmd_set_race_baud_rate()
     if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
+}
+
+void MainWindow::cmd_list_enter_race_com_mode()
+{
+    cmd_enter_race_com_mode();
+
+    QThread::msleep(2000);
+    cmd_set_race_baud_rate();
 }
 
 void MainWindow::cmd_read_mac_addr()
@@ -903,6 +921,46 @@ void MainWindow::cmd_list_force()
     cmd_force_get_semph();
 }
 
+void MainWindow::cmd_read_gsensor()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_read_gsensor(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_set_bt_visible()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_set_bt_visible(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_select_pcb_mic()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_select_pcb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_select_ff_mic()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_select_ff_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
+void MainWindow::cmd_select_fb_mic()
+{
+    QByteArray cmd;
+    if(RET_OK == earbud_construc_cmd_select_fb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+        sendHexMsg(cmd);
+    }
+}
+
 void MainWindow::cmd_earbud_enter_dut()
 {
     QByteArray cmd;
@@ -963,21 +1021,6 @@ void MainWindow::cmd_read_poff_cur()
 
 }
 
-void MainWindow::cmd_read_gsensor()
-{
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_read_gsensor(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
-}
-
-void MainWindow::cmd_set_bt_visible()
-{
-    QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_set_bt_visible(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
-        sendHexMsg(cmd);
-    }
-}
 
 void MainWindow::cmd_enter_age_mode()
 {

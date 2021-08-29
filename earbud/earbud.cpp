@@ -149,6 +149,10 @@ static parse_func_list_t earbud_parse_func_list = {
     {"0100", earbud_parse_rsp_read_gsensor },
     {"011100", earbud_parse_notify_set_bt_visible },
 
+    {"0C0E00", earbud_parse_notify_select_pcb_mic},
+    {"0C0E01", earbud_parse_notify_select_ff_mic},
+    {"0C0E02", earbud_parse_notify_select_fb_mic},
+
 };
 
 int earbud_initialize_parse_func_list(parse_func_map_t &map)
@@ -1317,3 +1321,105 @@ int earbud_parse_notify_set_bt_visible(const QByteArray hexdata, QJsonArray &jsa
 
     return RET_OK;
 }
+
+int earbud_construc_cmd_select_pcb_mic(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 07 05 5A 03 00 0C 0E 00";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_notify_select_pcb_mic(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "选择主板MIC";
+    QJsonObject jsobj;
+    QString correct_rsp = "FE FC 00 07 05 5B 03 00 0C 0E 00";
+    QByteArray correct_arr;
+
+    string2HexArray(correct_rsp, correct_arr);
+    if(hexdata.startsWith(correct_arr)) {
+        jsobj.insert(topic, VALUE_STR_SUCCESS);
+    }
+    else {
+        jsobj.insert(topic, VALUE_STR_FAIL);
+    }
+
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_select_ff_mic(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 07 05 5A 03 00 0C 0E 01";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_notify_select_ff_mic(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "选择FF MIC";
+    QJsonObject jsobj;
+    QString correct_rsp = "FE FC 00 07 05 5B 03 00 0C 0E 00";
+    QByteArray correct_arr;
+
+    string2HexArray(correct_rsp, correct_arr);
+    if(hexdata.startsWith(correct_arr)) {
+        jsobj.insert(topic, VALUE_STR_SUCCESS);
+    }
+    else {
+        jsobj.insert(topic, VALUE_STR_FAIL);
+    }
+
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+int earbud_construc_cmd_select_fb_mic(QByteArray &cmd, uint8_t earside)
+{
+    Q_UNUSED(earside);
+    QString str = "FE FC 00 07 05 5A 03 00 0C 0E 02";
+    if(RET_FAIL == string2HexArray(str, cmd) ) {
+        return RET_FAIL;
+    }
+
+    return RET_OK;
+}
+
+int earbud_parse_notify_select_fb_mic(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "选择FB MIC";
+    QJsonObject jsobj;
+    QString correct_rsp = "FE FC 00 07 05 5B 03 00 0C 0E 00";
+    QByteArray correct_arr;
+
+    string2HexArray(correct_rsp, correct_arr);
+    if(hexdata.startsWith(correct_arr)) {
+        jsobj.insert(topic, VALUE_STR_SUCCESS);
+    }
+    else {
+        jsobj.insert(topic, VALUE_STR_FAIL);
+    }
+
+    jsarr.append(jsobj);
+
+    return RET_OK;
+}
+
+
+
+
+
+
+
+
+

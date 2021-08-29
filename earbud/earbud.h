@@ -145,5 +145,12 @@ int earbud_parse_notify_read_bat_power(const QByteArray hexdata, QJsonArray &jsa
 int earbud_construc_cmd_set_bt_visible(QByteArray &cmd, uint8_t earside);
 int earbud_parse_notify_set_bt_visible(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_select_pcb_mic(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_select_pcb_mic(const QByteArray hexdata, QJsonArray &jsarr);
 
+int earbud_construc_cmd_select_ff_mic(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_select_ff_mic(const QByteArray hexdata, QJsonArray &jsarr);
+
+int earbud_construc_cmd_select_fb_mic(QByteArray &cmd, uint8_t earside);
+int earbud_parse_notify_select_fb_mic(const QByteArray hexdata, QJsonArray &jsarr);
 #endif // EARBUD_H
