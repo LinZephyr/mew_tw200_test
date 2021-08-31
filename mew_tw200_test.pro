@@ -12,6 +12,9 @@ SOURCES += \
     chgbox/chgbox.cpp \
     data_process/worker_thread.cpp \
     earbud/earbud.cpp \
+    earbud/earbud_commu_mode.cpp \
+    earbud/earbud_onewire.cpp \
+    earbud/earbud_race.cpp \
     main.cpp \
     mainwindow.cpp \
     qextserial/qextserialport.cpp \
@@ -22,6 +25,10 @@ HEADERS += \
     chgbox/chgbox.h \
     data_process/worker_thread.h \
     earbud/earbud.h \
+    earbud/earbud_commu_mode.h \
+    earbud/earbud_internal.h \
+    earbud/earbud_onewire.h \
+    earbud/earbud_race.h \
     mainwindow.h \
     mew_type_define.h \
     qextserial/qextserialport.h \

@@ -10,7 +10,7 @@
 bool is_rsp_from_chgbox(const QByteArray &hexdata);
 QString chgbox_get_rsp_key(const QByteArray &hexrsp);
 
-int chgbox_initialize_parse_func_list(parse_func_map_t &map);
+int init_chgbox_parse_func_map(parse_func_map_t &map);
 
 QByteArray construct_chgbox_basic_ft_cmd(bool led1, bool led2, bool led3, bool chg_mode);
 int parse_chgbox_basic_ft_rsp(const QByteArray hexdata, QJsonArray &jsarr);

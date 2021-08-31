@@ -4,6 +4,7 @@
 #include <QByteArray>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDebug>
 
 //#define DUMP_THREAD_ID
 
@@ -26,6 +27,11 @@ typedef std::initializer_list<parse_func_pair_t> parse_func_list_t;
 #define VALUE_STR_SUCCESS  "成功"
 #define VALUE_STR_FAIL     "失败"
 #define VALUE_STR_TESTING   "测试中..."
+
+#define VALUE_STR_LENGTH_NOT_ENOUGH "回复数据长度不够"
+
+#define EARSIDE_LEFT 0
+#define EARSIDE_RIGHT 1
 
 #define addInfo2Array(jsarr, k, v, print) do \
     {\

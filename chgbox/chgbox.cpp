@@ -37,7 +37,7 @@ static parse_func_list_t chgbox_parse_func_list = {
     {chgbox_make_key(CHGBOX_FT_RSP_LEAD, CHGBOX_FT_R_SN_RSP_FC),  parse_chgbox_ft_r_sn_rsp},
 };
 
-int chgbox_initialize_parse_func_list(parse_func_map_t &map)
+int init_chgbox_parse_func_map(parse_func_map_t &map)
 {
     for(parse_func_list_t::const_iterator it = chgbox_parse_func_list.begin(); it != chgbox_parse_func_list.end(); ++it) {
         if(map.find(it->first) != map.end()) {

@@ -79,8 +79,15 @@ bool checkCRC8(const unsigned char crc8, const unsigned char * ptr, unsigned cha
     return crc8 == calcCRC8(0, ptr, len);
 }
 
+uint32_t calc_length_little_end(uint32_t len1, uint32_t len2)
+{
+    return len1 << 8 | len2;
+}
 
-
+uint32_t calc_length_big_end(uint32_t len1, uint32_t len2)
+{
+    return len2 << 8 | len1;
+}
 
 
 

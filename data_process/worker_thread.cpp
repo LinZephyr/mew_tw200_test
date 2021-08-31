@@ -12,7 +12,7 @@
 #include <QDir>
 #include <QDateTime>
 
-parse_func_map_t parse_map;
+parse_func_map_t parse_func_map;
 
 SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
     json_file(QDir::currentPath() + "/MEW-" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".json")
@@ -25,8 +25,8 @@ SerialPortWorker::SerialPortWorker(QObject *parent) : QObject(parent),
         qDebug() << "open json file FAIL!!!";
     }
 
-    chgbox_initialize_parse_func_list(parse_map);
-    earbud_initialize_parse_func_list(parse_map);
+    init_chgbox_parse_func_map(parse_func_map);
+    init_earbud_parse_func_map(parse_func_map);
 }
 
 SerialPortWorker::~SerialPortWorker() {
@@ -44,21 +44,21 @@ void SerialPortWorker::doWork(const QByteArray hexdata) {
     if( is_rsp_from_chgbox(hexdata) ) {
         key = chgbox_get_rsp_key(hexdata);
     }
-    else if(is_notify_from_earbud(hexdata)){
-        key = earbud_get_notify_key(hexdata);
+    else if(is_1wire_reply(hexdata)){
+        key = get_1wire_reply_key(hexdata);
     }
-    else if(is_notify_from_earbud_chgbox_com_mode(hexdata)) {
-        key = earbud_chgbox_com_mode_get_notify_key(hexdata);
+    else if(is_chgbox_commu_mode_reply(hexdata)) {
+        key = get_chgbox_commu_mode_reply_key(hexdata);
     }
-    else if(is_rsp_from_earbud(hexdata)) {
-        key = earbud_get_rsp_key(hexdata);
+    else if(is_race_reply(hexdata)) {
+        key = get_race_reply_key(hexdata);
     }
 
     if(key.isEmpty()) {
         return;
     }
-    parse_func_map_t::iterator it = parse_map.find(key);
-    if(it != parse_map.end()) {
+    parse_func_map_t::iterator it = parse_func_map.find(key);
+    if(it != parse_func_map.end()) {
         it.value()(hexdata, jsarr);
     }
 

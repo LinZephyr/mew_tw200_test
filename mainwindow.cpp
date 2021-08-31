@@ -15,33 +15,33 @@
 
 #define  TIMER_INTERVAL_SEND_COMMAND  1000
 
-#define CMD_ENTER_1WIRE_COM_MODE    "开始1-Wire通信"
-#define CMD_ONEWIRE_R_MAC    "读MAC地址"
-#define CMD_ONEWIRE_R_VER    "读耳机版本"
-#define CMD_ONEWIRE_R_CHANNEL     "读声道"
-#define CMD_ONEWIRE_R_NTC    "读NTC温度"
-#define CMD_ONEWIRE_R_BAT_POWER    "读电量"
-#define CMD_ONEWIRE_ACTIV_LIC       "授权码激活"
-#define CMD_ONEWIRE_CAPTOUCH_SENSOR     "容触测试"
-#define CMD_ONEWIRE_OPTIC_SENSOR    "光感测试"
-#define CMD_ONEWIRE_FORCE_SENSOR    "压感测试"
+#define CHGBOX_CMD_ENTER_1WIRE_COMMU_MODE    "开始1-Wire通信"
+#define ONEWIRE_CMD_READ_MAC    "读MAC地址"
+#define ONEWIRE_CMD_READ_VER    "读耳机版本"
+#define ONEWIRE_CMD_READ_CHANNEL     "读声道"
+#define ONEWIRE_CMD_READ_NTC    "读NTC温度"
+#define ONEWIRE_CMD_READ_BAT_POWER    "读电量"
+#define ONEWIRE_CMD_ACTIV_LIC       "授权码激活"
+#define ONEWIRE_CMD_CAPTOUCH_SENSOR     "容触测试"
+#define ONEWIRE_CMD_OPTIC_SENSOR    "光感测试"
+#define ONEWIRE_CMD_FORCE_SENSOR    "压感测试"
 
-#define CMD_ENTER_RACE_COM_MODE  "开始RACE通信"
-#define CMD_SET_RACE_BAUTE_RATE "设置RACE波特率"
-#define CMD_RACE_R_GSENSOR  "读GSensor"
-#define CMD_RACE_SET_BT_VISIBLE  "蓝牙可见"
-#define CMD_RACE_SELECT_PCB_MIC "选择主板MIC"
-#define CMD_RACE_SELECT_FF_MIC "选择FF MIC"
-#define CMD_RACE_SELECT_FB_MIC "选择FB MIC"
-#define CMD_RACE_ENTER_DUT  "进入DUT"
-#define CMD_RACE_EXIT_DUT   "退出DUT"
-#define CMD_RACE_POWEROFF   "关机"
-#define CMD_RACE_STANDBY    "待机"
-#define CMD_RACE_RESTART    "重启"
-#define CMD_RACE_R_CHG_CUR  "读充电电流"
-#define CMD_RACE_R_WORK_CUR "读工作电流"
-#define CMD_RACE_R_BG_CUR   "读底电流"
-#define CMD_RACE_R_POFF_CUR "读关机电流"
+#define CHGBOX_CMD_ENTER_RACE_COMMU_MODE  "开始RACE通信"
+#define ONEWIRE_CMD_SET_RACE_BAUTE_RATE "设置RACE波特率"
+#define RACE_CMD_READ_GSENSOR  "读GSensor"
+#define RACE_CMD_SET_BT_VISIBLE  "蓝牙可见"
+#define RACE_CMD_SELECT_PCB_MIC "选择主板MIC"
+#define RACE_CMD_SELECT_FF_MIC "选择FF MIC"
+#define RACE_CMD_SELECT_FB_MIC "选择FB MIC"
+#define RACE_CMD_ENTER_DUT  "进入DUT"
+#define RACE_CMD_EXIT_DUT   "退出DUT"
+#define RACE_CMD_POWEROFF   "关机"
+#define RACE_CMD_STANDBY    "待机"
+#define RACE_CMD_RESTART    "重启"
+#define RACE_CMD_READ_CHG_CUR  "读充电电流"
+#define RACE_CMD_READ_WORK_CUR "读工作电流"
+#define RACE_CMD_READ_BG_CUR   "读底电流"
+#define RACE_CMD_READ_POFF_CUR "读关机电流"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -137,16 +137,16 @@ void MainWindow::init_table_widget(QTableWidget *tbl, const cmd_func_list_t func
 void MainWindow::init_1wire_tbl()
 {
     cmd_func_list_t cmd_onewire_func_list = {
-        { CMD_ENTER_1WIRE_COM_MODE, std::bind(&MainWindow::cmd_enter_1wire_com_mode, this) },
-        { CMD_ONEWIRE_R_MAC, std::bind(&MainWindow::cmd_read_mac_addr, this) },
-        { CMD_ONEWIRE_R_VER, std::bind(&MainWindow::cmd_read_fw_ver_addr, this) },
-        { CMD_ONEWIRE_R_CHANNEL, std::bind(&MainWindow::cmd_read_channel, this) },
-        { CMD_ONEWIRE_R_NTC, std::bind(&MainWindow::cmd_read_ntc, this) },
-        { CMD_ONEWIRE_R_BAT_POWER, std::bind(&MainWindow::cmd_read_bat_power, this) },
-        { CMD_ONEWIRE_ACTIV_LIC, std::bind(&MainWindow::cmd_list_active_license_key, this) },
-        { CMD_ONEWIRE_CAPTOUCH_SENSOR, std::bind(&MainWindow::cmd_list_captouch, this) },
-        { CMD_ONEWIRE_OPTIC_SENSOR, std::bind(&MainWindow::cmd_list_optic, this) },
-        { CMD_ONEWIRE_FORCE_SENSOR, std::bind(&MainWindow::cmd_list_force, this) },
+        { CHGBOX_CMD_ENTER_1WIRE_COMMU_MODE, std::bind(&MainWindow::cmd_enter_1wire_com_mode, this) },
+        { ONEWIRE_CMD_READ_MAC, std::bind(&MainWindow::cmd_read_mac_addr, this) },
+        { ONEWIRE_CMD_READ_VER, std::bind(&MainWindow::cmd_read_fw_ver_addr, this) },
+        { ONEWIRE_CMD_READ_CHANNEL, std::bind(&MainWindow::cmd_read_channel, this) },
+        { ONEWIRE_CMD_READ_NTC, std::bind(&MainWindow::cmd_read_ntc, this) },
+        { ONEWIRE_CMD_READ_BAT_POWER, std::bind(&MainWindow::cmd_read_bat_power, this) },
+        { ONEWIRE_CMD_ACTIV_LIC, std::bind(&MainWindow::cmd_list_active_license_key, this) },
+        { ONEWIRE_CMD_CAPTOUCH_SENSOR, std::bind(&MainWindow::cmd_list_captouch, this) },
+        { ONEWIRE_CMD_OPTIC_SENSOR, std::bind(&MainWindow::cmd_list_optic, this) },
+        { ONEWIRE_CMD_FORCE_SENSOR, std::bind(&MainWindow::cmd_list_force, this) },
     };
     init_table_widget(ui->onewire_tbl, cmd_onewire_func_list, 4);
     ui->onewire_tbl->item(0, 0)->setBackgroundColor(Qt::darkGreen);
@@ -155,22 +155,22 @@ void MainWindow::init_1wire_tbl()
 void MainWindow::init_race_tbl()
 {
     cmd_func_list_t cmd_race_func_list = {
-        { CMD_ENTER_RACE_COM_MODE, std::bind(&MainWindow::cmd_list_enter_race_com_mode, this) },
+        { CHGBOX_CMD_ENTER_RACE_COMMU_MODE, std::bind(&MainWindow::cmd_list_enter_race_com_mode, this) },
         //{ CMD_SET_RACE_BAUTE_RATE, std::bind(&MainWindow::cmd_set_race_baud_rate, this) },
-        { CMD_RACE_R_GSENSOR, std::bind(&MainWindow::cmd_read_gsensor, this) },
-        { CMD_RACE_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
-        { CMD_RACE_SELECT_PCB_MIC, std::bind(&MainWindow::cmd_select_pcb_mic, this) },
-        { CMD_RACE_SELECT_FF_MIC, std::bind(&MainWindow::cmd_select_ff_mic, this) },
-        { CMD_RACE_SELECT_FB_MIC, std::bind(&MainWindow::cmd_select_fb_mic, this) },
-        { CMD_RACE_ENTER_DUT, std::bind(&MainWindow::cmd_earbud_enter_dut, this) },
-        { CMD_RACE_EXIT_DUT, std::bind(&MainWindow::cmd_earbud_exit_dut, this) },
-        { CMD_RACE_POWEROFF, std::bind(&MainWindow::cmd_earbud_power_off, this) },
-        { CMD_RACE_STANDBY, std::bind(&MainWindow::cmd_enter_standby, this) },
-        { CMD_RACE_RESTART, std::bind(&MainWindow::cmd_earbud_restart, this) },
-        { CMD_RACE_R_CHG_CUR, std::bind(&MainWindow::cmd_read_chg_cur, this) },
-        { CMD_RACE_R_WORK_CUR, std::bind(&MainWindow::cmd_read_work_cur, this) },
-        { CMD_RACE_R_BG_CUR, std::bind(&MainWindow::cmd_read_bg_cur, this) },
-        { CMD_RACE_R_POFF_CUR, std::bind(&MainWindow::cmd_read_poff_cur, this) },
+        { RACE_CMD_READ_GSENSOR, std::bind(&MainWindow::cmd_read_gsensor, this) },
+        { RACE_CMD_SET_BT_VISIBLE, std::bind(&MainWindow::cmd_set_bt_visible, this) },
+        { RACE_CMD_SELECT_PCB_MIC, std::bind(&MainWindow::cmd_select_pcb_mic, this) },
+        { RACE_CMD_SELECT_FF_MIC, std::bind(&MainWindow::cmd_select_ff_mic, this) },
+        { RACE_CMD_SELECT_FB_MIC, std::bind(&MainWindow::cmd_select_fb_mic, this) },
+        { RACE_CMD_ENTER_DUT, std::bind(&MainWindow::cmd_earbud_enter_dut, this) },
+        { RACE_CMD_EXIT_DUT, std::bind(&MainWindow::cmd_earbud_exit_dut, this) },
+        { RACE_CMD_POWEROFF, std::bind(&MainWindow::cmd_earbud_power_off, this) },
+        { RACE_CMD_STANDBY, std::bind(&MainWindow::cmd_enter_standby, this) },
+        { RACE_CMD_RESTART, std::bind(&MainWindow::cmd_earbud_restart, this) },
+        { RACE_CMD_READ_CHG_CUR, std::bind(&MainWindow::cmd_read_chg_cur, this) },
+        { RACE_CMD_READ_WORK_CUR, std::bind(&MainWindow::cmd_read_work_cur, this) },
+        { RACE_CMD_READ_BG_CUR, std::bind(&MainWindow::cmd_read_bg_cur, this) },
+        { RACE_CMD_READ_POFF_CUR, std::bind(&MainWindow::cmd_read_poff_cur, this) },
     };
     init_table_widget(ui->race_tbl, cmd_race_func_list, 4);
     ui->race_tbl->item(0, 0)->setBackgroundColor(Qt::darkGreen);
@@ -538,11 +538,11 @@ void MainWindow::exec_cmd_func(QString k)
 {
     cmd_func_map_t::iterator it = cmd_func_map.find(k);
     if(it != cmd_func_map.end()) {
-        if(k == CMD_ONEWIRE_ACTIV_LIC
-                || k == CMD_ONEWIRE_CAPTOUCH_SENSOR
-                || k == CMD_ONEWIRE_OPTIC_SENSOR
-                || k == CMD_ONEWIRE_FORCE_SENSOR
-                || k == CMD_ENTER_RACE_COM_MODE
+        if(k == ONEWIRE_CMD_ACTIV_LIC
+                || k == ONEWIRE_CMD_CAPTOUCH_SENSOR
+                || k == ONEWIRE_CMD_OPTIC_SENSOR
+                || k == ONEWIRE_CMD_FORCE_SENSOR
+                || k == CHGBOX_CMD_ENTER_RACE_COMMU_MODE
         ) {
             qDebug() << "create a new thread to exec command list";
             QtConcurrent::run(it.value());
@@ -556,7 +556,7 @@ void MainWindow::exec_cmd_func(QString k)
 void MainWindow::cmd_enter_1wire_com_mode()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_1wire_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_chgbox_cmd_enter_1wire_commu_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -564,7 +564,7 @@ void MainWindow::cmd_enter_1wire_com_mode()
 void MainWindow::cmd_enter_race_com_mode()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_race_com_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_chgbox_cmd_enter_race_commu_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -572,7 +572,7 @@ void MainWindow::cmd_enter_race_com_mode()
 void MainWindow::cmd_set_race_baud_rate()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_set_vbus_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_set_baud_rate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -588,7 +588,7 @@ void MainWindow::cmd_list_enter_race_com_mode()
 void MainWindow::cmd_read_mac_addr()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_read_mac(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_read_mac(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -596,7 +596,7 @@ void MainWindow::cmd_read_mac_addr()
 void MainWindow::cmd_read_fw_ver_addr()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -604,7 +604,7 @@ void MainWindow::cmd_read_fw_ver_addr()
 void MainWindow::cmd_read_channel()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_read_channel(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_read_channel(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -612,7 +612,7 @@ void MainWindow::cmd_read_channel()
 void MainWindow::cmd_read_ntc()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_read_temperature(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_read_ntc(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -620,7 +620,7 @@ void MainWindow::cmd_read_ntc()
 void MainWindow::cmd_read_bat_power()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_read_bat_power(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_read_bat_power(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -631,19 +631,19 @@ void MainWindow::cmd_list_active_license_key()
     qDebug() << "MainWindow:" << __FUNCTION__ << ", thread_id:" << QThread::currentThreadId();
 #endif
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_get_license_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_get_lic_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
     cmd.clear();
-    if(RET_OK == earbud_construct_cmd_set_license_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_set_lic_key(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 
     QThread::msleep(TIMER_INTERVAL_SEND_COMMAND);
     cmd.clear();
-    if(RET_OK == earbud_construct_cmd_get_license_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_get_lic_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -651,7 +651,7 @@ void MainWindow::cmd_list_active_license_key()
 void MainWindow::cmd_captouch_start_interrupt()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_start_int(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_start_int(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -659,7 +659,7 @@ void MainWindow::cmd_captouch_start_interrupt()
 void MainWindow::cmd_captouch_get_interrupt_result()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_get_int_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_get_int_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -667,7 +667,7 @@ void MainWindow::cmd_captouch_get_interrupt_result()
 void MainWindow::cmd_captouch_read_version()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_read_version(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -675,7 +675,7 @@ void MainWindow::cmd_captouch_read_version()
 void MainWindow::cmd_captouch_start_calib()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_start_calib(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_start_calib(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -683,7 +683,7 @@ void MainWindow::cmd_captouch_start_calib()
 void MainWindow::cmd_captouch_get_calib_result()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_get_calib_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_get_calib_result(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -691,7 +691,7 @@ void MainWindow::cmd_captouch_get_calib_result()
 void MainWindow::cmd_captouch_read_value()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construct_cmd_captouch_read_value(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_captouch_read_value(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -755,7 +755,7 @@ void MainWindow::cmd_list_captouch()
 void MainWindow::cmd_optic_communicate()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_communicate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_communicate(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -763,7 +763,7 @@ void MainWindow::cmd_optic_communicate()
 void MainWindow::cmd_optic_int_start()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_int_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_int_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -771,7 +771,7 @@ void MainWindow::cmd_optic_int_start()
 void MainWindow::cmd_optic_int_end()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_int_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_int_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -779,7 +779,7 @@ void MainWindow::cmd_optic_int_end()
 void MainWindow::cmd_optic_laser_start()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_laser_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_laser_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -787,7 +787,7 @@ void MainWindow::cmd_optic_laser_start()
 void MainWindow::cmd_optic_laser_end()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_laser_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_laser_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -795,7 +795,7 @@ void MainWindow::cmd_optic_laser_end()
 void MainWindow::cmd_optic_full_scale_start()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_full_scale_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_full_scale_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -803,7 +803,7 @@ void MainWindow::cmd_optic_full_scale_start()
 void MainWindow::cmd_optic_full_scale_end()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_full_scale_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_full_scale_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -811,7 +811,7 @@ void MainWindow::cmd_optic_full_scale_end()
 void MainWindow::cmd_optic_bg_noise_start()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_bg_noise_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_bg_noise_start(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -819,7 +819,7 @@ void MainWindow::cmd_optic_bg_noise_start()
 void MainWindow::cmd_optic_bg_noise_end()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_optic_bg_noise_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_optic_bg_noise_end(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -856,7 +856,7 @@ void MainWindow::cmd_list_optic()
 void MainWindow::cmd_force_start_detect()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_start_detect(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_start_detect(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -864,7 +864,7 @@ void MainWindow::cmd_force_start_detect()
 void MainWindow::cmd_force_get_fw_ver()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_get_fw_ver(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_get_fw_ver(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -872,7 +872,7 @@ void MainWindow::cmd_force_get_fw_ver()
 void MainWindow::cmd_force_get_assemble()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_get_assemble(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_get_assemble(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -880,7 +880,7 @@ void MainWindow::cmd_force_get_assemble()
 void MainWindow::cmd_force_get_noise_peak()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_get_noise_peak(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_get_noise_peak(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -888,7 +888,7 @@ void MainWindow::cmd_force_get_noise_peak()
 void MainWindow::cmd_force_get_burst_pressure()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_get_burst_pressure(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_get_burst_pressure(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -896,7 +896,7 @@ void MainWindow::cmd_force_get_burst_pressure()
 void MainWindow::cmd_force_get_semph()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_force_get_semph(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_force_get_semph(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -924,7 +924,7 @@ void MainWindow::cmd_list_force()
 void MainWindow::cmd_read_gsensor()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_read_gsensor(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_read_gsensor(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -932,7 +932,7 @@ void MainWindow::cmd_read_gsensor()
 void MainWindow::cmd_set_bt_visible()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_set_bt_visible(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_set_bt_visible(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -940,7 +940,7 @@ void MainWindow::cmd_set_bt_visible()
 void MainWindow::cmd_select_pcb_mic()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_select_pcb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_select_pcb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -948,7 +948,7 @@ void MainWindow::cmd_select_pcb_mic()
 void MainWindow::cmd_select_ff_mic()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_select_ff_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_select_ff_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -956,7 +956,7 @@ void MainWindow::cmd_select_ff_mic()
 void MainWindow::cmd_select_fb_mic()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_select_fb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_select_fb_mic(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -964,7 +964,7 @@ void MainWindow::cmd_select_fb_mic()
 void MainWindow::cmd_earbud_enter_dut()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -972,7 +972,7 @@ void MainWindow::cmd_earbud_enter_dut()
 void MainWindow::cmd_earbud_exit_dut()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_enter_dut(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -980,7 +980,7 @@ void MainWindow::cmd_earbud_exit_dut()
 void MainWindow::cmd_earbud_power_off()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_power_off(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -988,7 +988,7 @@ void MainWindow::cmd_earbud_power_off()
 void MainWindow::cmd_enter_standby()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_standby(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_enter_standby(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -996,7 +996,7 @@ void MainWindow::cmd_enter_standby()
 void MainWindow::cmd_earbud_restart()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_restart(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_race_cmd_restart(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
@@ -1025,7 +1025,7 @@ void MainWindow::cmd_read_poff_cur()
 void MainWindow::cmd_enter_age_mode()
 {
     QByteArray cmd;
-    if(RET_OK == earbud_construc_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
+    if(RET_OK == make_1wire_cmd_enter_age_mode(cmd, ui->earside_left_rbtn->isChecked() ? EARSIDE_LEFT : EARSIDE_RIGHT)) {
         sendHexMsg(cmd);
     }
 }
