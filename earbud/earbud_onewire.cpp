@@ -758,7 +758,7 @@ int parse_1wire_reply_optic_bg_noise_end(const QByteArray hexdata, QJsonArray &j
     uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
     QString k;
     k.sprintf("底噪值 = %d", v);
-    jsobj.insert(k,  v <= 15 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+    jsobj.insert(k, v <= 100 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
     jsarr.append(jsobj);
 
     return 0;
