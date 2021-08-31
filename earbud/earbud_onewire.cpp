@@ -240,7 +240,7 @@ int parse_1wire_reply_read_mac(const QByteArray hexdata, QJsonArray &jsarr)
     QJsonObject jsobj;
     QByteArray mac_array;
     for(int i = 0; i < ONEWIRE_PAYLOAD_LENGTH_MAC; ++i) {
-        mac_array.append(hexdata[sizeof(onewire_reply_header_t) + i]);
+        mac_array.append(hexdata[sizeof(onewire_reply_header_t) + 5 - i]);
     }
     QString mac_str = hexArray2StringPlusSpace(mac_array);
     jsobj.insert(topic, mac_str);
