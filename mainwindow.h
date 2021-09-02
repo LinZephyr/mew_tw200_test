@@ -110,7 +110,13 @@ private:
     void cmd_optic_full_scale_end();
     void cmd_optic_bg_noise_start();
     void cmd_optic_bg_noise_end();
-    void cmd_list_optic();
+    void cmd_list_semi_product_optic_sensor_test();
+
+    void cmd_optic_start_calib_bg_noise();
+    void cmd_optic_end_calib_bg_noise();
+    void cmd_optic_calib_12mm();
+    void cmd_optic_calib_3mm();
+    void cmd_list_full_product_optic_sensor_test();
 
     void cmd_force_start_detect();
     void cmd_force_get_fw_ver();

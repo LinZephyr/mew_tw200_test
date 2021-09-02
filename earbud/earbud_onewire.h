@@ -78,6 +78,18 @@ int parse_1wire_reply_optic_bg_noise_start(const QByteArray hexdata, QJsonArray 
 int make_1wire_cmd_optic_bg_noise_end(QByteArray &cmd, uint8_t earside);
 int parse_1wire_reply_optic_bg_noise_end(const QByteArray hexdata, QJsonArray &jsarr);
 
+int make_1wire_cmd_optic_start_calib_bg_noise(QByteArray &cmd, uint8_t earside);
+int parse_1wire_reply_optic_start_calib_bg_noise(const QByteArray hexdata, QJsonArray &jsarr);
+
+int make_1wire_cmd_optic_end_calib_bg_noise(QByteArray &cmd, uint8_t earside);
+int parse_1wire_reply_optic_end_calib_bg_noise(const QByteArray hexdata, QJsonArray &jsarr);
+
+int make_1wire_cmd_optic_12mm(QByteArray &cmd, uint8_t earside);
+int parse_1wire_reply_optic_calib_12mm(const QByteArray hexdata, QJsonArray &jsarr);
+
+int make_1wire_cmd_optic_3mm(QByteArray &cmd, uint8_t earside);
+int parse_1wire_reply_optic_calib_3mm(const QByteArray hexdata, QJsonArray &jsarr);
+
 int make_1wire_cmd_force_start_detect(QByteArray &cmd, uint8_t earside);
 int parse_1wire_reply_force_start_detect(const QByteArray hexdata, QJsonArray &jsarr);
 

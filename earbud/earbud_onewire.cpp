@@ -27,6 +27,10 @@
 #define ONEWIRE_PAYLOAD_LENGTH_OPTIC_FULL_SCALE_END          2
 #define ONEWIRE_PAYLOAD_LENGTH_OPTIC_BG_NOISE_START      1
 #define ONEWIRE_PAYLOAD_LENGTH_OPTIC_BG_NOISE_END        2
+#define ONEWIRE_PAYLOAD_LENGTH_OPTIC_START_CALIB_BG_NOISE   1
+#define ONEWIRE_PAYLOAD_LENGTH_OPTIC_END_CALIB_BG_NOISE     2
+#define ONEWIRE_PAYLOAD_LENGTH_OPTIC_12MM       2
+#define ONEWIRE_PAYLOAD_LENGTH_OPTIC_3MM        2
 
 #define ONEWIRE_PAYLOAD_LENGTH_FORCE_START_DETECT    1
 #define ONEWIRE_PAYLOAD_LENGTH_FORCE_GET_FW_VER      1
@@ -63,6 +67,10 @@
 #define ONEWIRE_CMD_OPTIC_FULL_SCALE_END             0X93
 #define ONEWIRE_CMD_OPTIC_BG_NOISE_START         0X94
 #define ONEWIRE_CMD_OPTIC_BG_NOISE_END           0X95
+#define ONEWIRE_CMD_OPTIC_START_CALIB_BG_NOISE   0X96
+#define ONEWIRE_CMD_OPTIC_END_CALIB_BG_NOISE     0X97
+#define ONEWIRE_CMD_OPTIC_CALIB_12MM          0X98
+#define ONEWIRE_CMD_OPTIC_CALIB_3MM           0X99
 
 #define ONEWIRE_CMD_FORCE_START_DETECT           0X87
 #define ONEWIRE_CMD_FORCE_GET_FW_VER             0X88
@@ -109,6 +117,11 @@ parse_func_list_t* get_1wire_parse_func_list()
         {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_FULL_SCALE_END), parse_1wire_reply_optic_full_scale_end},
         {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_BG_NOISE_START), parse_1wire_reply_optic_bg_noise_start},
         {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_BG_NOISE_END), parse_1wire_reply_optic_bg_noise_end},
+
+        {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_START_CALIB_BG_NOISE), parse_1wire_reply_optic_start_calib_bg_noise},
+        {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_END_CALIB_BG_NOISE), parse_1wire_reply_optic_end_calib_bg_noise},
+        {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_CALIB_12MM), parse_1wire_reply_optic_calib_12mm},
+        {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_CALIB_3MM), parse_1wire_reply_optic_calib_3mm},
 
         {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_FORCE_START_DETECT), parse_1wire_reply_force_start_detect },
         {make_1wire_key(EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_FORCE_GET_FW_VER), parse_1wire_reply_force_get_fw_ver },
@@ -759,6 +772,104 @@ int parse_1wire_reply_optic_bg_noise_end(const QByteArray hexdata, QJsonArray &j
     QString k;
     k.sprintf("底噪值 = %d", v);
     jsobj.insert(k, v <= 100 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int make_1wire_cmd_optic_start_calib_bg_noise(QByteArray &cmd, uint8_t earside)
+{
+    make_onewire_cmd_header(cmd, 0, 8, 0, 4, EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_START_CALIB_BG_NOISE, earside);
+    return 0;
+}
+
+int parse_1wire_reply_optic_start_calib_bg_noise(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "光感底噪校准开始";
+    if(RET_FAIL == check_onewire_reply_format(hexdata, ONEWIRE_PAYLOAD_LENGTH_OPTIC_START_CALIB_BG_NOISE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    QJsonObject jsobj;
+    jsobj.insert(topic, VALUE_STR_SUCCESS);
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int make_1wire_cmd_optic_end_calib_bg_noise(QByteArray &cmd, uint8_t earside)
+{
+    make_onewire_cmd_header(cmd, 0, 8, 0, 4, EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_END_CALIB_BG_NOISE, earside);
+    return 0;
+}
+
+int parse_1wire_reply_optic_end_calib_bg_noise(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "光感底噪校准结束";
+    if(RET_FAIL == check_onewire_reply_format(hexdata, ONEWIRE_PAYLOAD_LENGTH_OPTIC_END_CALIB_BG_NOISE, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    jsarr.append(topic);
+
+    QJsonObject jsobj;
+    uint8_t idx = sizeof(onewire_reply_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QString k;
+    k.sprintf("底噪值 = %d", v);
+    jsobj.insert(k, v <= 350 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int make_1wire_cmd_optic_12mm(QByteArray &cmd, uint8_t earside)
+{
+    make_onewire_cmd_header(cmd, 0, 8, 0, 4, EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_CALIB_12MM, earside);
+    return 0;
+}
+
+int parse_1wire_reply_optic_calib_12mm(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "光感12mm";
+    if(RET_FAIL == check_onewire_reply_format(hexdata, ONEWIRE_PAYLOAD_LENGTH_OPTIC_12MM, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    jsarr.append(topic);
+
+    QJsonObject jsobj;
+    uint8_t idx = sizeof(onewire_reply_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QString k;
+    k.sprintf("PXS = %d", v);
+    jsobj.insert(k, v <= 1000 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
+    jsarr.append(jsobj);
+
+    return 0;
+}
+
+int make_1wire_cmd_optic_3mm(QByteArray &cmd, uint8_t earside)
+{
+    make_onewire_cmd_header(cmd, 0, 8, 0, 4, EARBUD_MSG_USR_ID1, EARBUD_MSG_USR_ID2, ONEWIRE_CMD_OPTIC_CALIB_3MM, earside);
+    return 0;
+}
+
+int parse_1wire_reply_optic_calib_3mm(const QByteArray hexdata, QJsonArray &jsarr)
+{
+    QString topic = "光感3mm";
+    if(RET_FAIL == check_onewire_reply_format(hexdata, ONEWIRE_PAYLOAD_LENGTH_OPTIC_3MM, topic, jsarr)) {
+        return RET_FAIL;
+    }
+
+    jsarr.append(topic);
+
+    QJsonObject jsobj;
+    uint8_t idx = sizeof(onewire_reply_header_t);
+    uint16_t v = (uint8_t)hexdata[idx] | (uint8_t)hexdata[idx + 1] << 8;
+    QString k;
+    k.sprintf("PXS = %d", v);
+    jsobj.insert(k, v <= 1000 ? VALUE_STR_SUCCESS : VALUE_STR_FAIL );
     jsarr.append(jsobj);
 
     return 0;
