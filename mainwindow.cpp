@@ -23,8 +23,10 @@
 #define ONEWIRE_CMD_READ_BAT_POWER    "读电量"
 #define ONEWIRE_CMD_ACTIV_LIC       "授权码激活"
 #define ONEWIRE_CMD_CAPTOUCH_SENSOR     "容触测试"
+#define ONEWIRE_CMD_CAPTOUCH_READ_VER   "读容触版本"
 #define ONEWIRE_CMD_SEMI_PRODUCT_OPTIC_SENSOR    "半成品光感测试"
 #define ONEWIRE_CMD_FULL_PRODUCT_OPTIC_SENSOR    "成品光感校准"
+#define ONEWIRE_CMD_OPTIC_SENSOR_COMMU_TEST    "光感通信测试"
 #define ONEWIRE_CMD_FORCE_SENSOR    "压感测试"
 
 #define CHGBOX_CMD_ENTER_RACE_COMMU_MODE  "开始RACE通信"
@@ -146,8 +148,10 @@ void MainWindow::init_1wire_tbl()
         { ONEWIRE_CMD_READ_BAT_POWER, std::bind(&MainWindow::cmd_read_bat_power, this) },
         { ONEWIRE_CMD_ACTIV_LIC, std::bind(&MainWindow::cmd_list_active_license_key, this) },
         { ONEWIRE_CMD_CAPTOUCH_SENSOR, std::bind(&MainWindow::cmd_list_captouch, this) },
+        { ONEWIRE_CMD_CAPTOUCH_READ_VER, std::bind(&MainWindow::cmd_captouch_read_version, this) },
         { ONEWIRE_CMD_SEMI_PRODUCT_OPTIC_SENSOR, std::bind(&MainWindow::cmd_list_semi_product_optic_sensor_test, this) },
         { ONEWIRE_CMD_FULL_PRODUCT_OPTIC_SENSOR, std::bind(&MainWindow::cmd_list_full_product_optic_sensor_test, this) },
+        { ONEWIRE_CMD_OPTIC_SENSOR_COMMU_TEST, std::bind(&MainWindow::cmd_optic_communicate, this) },
         { ONEWIRE_CMD_FORCE_SENSOR, std::bind(&MainWindow::cmd_list_force, this) },
     };
     init_table_widget(ui->onewire_tbl, cmd_onewire_func_list, 4);
